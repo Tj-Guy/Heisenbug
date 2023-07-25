@@ -8,5 +8,10 @@
   "devDependencies": {
     "@hsui/plugin-lint": "^1.0.0",
     "@hsui/plugin-micro-app": "^1.8.6"
+  },
+  "scripts": {
+    "dev": "hui dev -p 2021 -b",
+    "build": "hui build",
+    "serve": "npm run build && hui serve ./dist -p 2022"
   }
 }
