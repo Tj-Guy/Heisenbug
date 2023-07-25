@@ -1,0 +1,12 @@
+{
+  "name": "Heisenbug-Hui",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@hsui/core": "^1.6.1"
+  },
+  "devDependencies": {
+    "@hsui/plugin-lint": "^1.0.0",
+    "@hsui/plugin-micro-app": "^1.8.6"
+  }
+}
