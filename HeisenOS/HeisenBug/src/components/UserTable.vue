@@ -1,14 +1,7 @@
 <template>
   <div>
-    <h-table
-      border
-      :columns="columns4"
-      :data="data1"
-      @on-select="selectOne"
-      @on-select-all="selectAll"
-      @on-selection-change="selectChange"
-      @on-select-cancel="selectCancel"
-    ></h-table>
+    <h-table border :columns="columns4" :data="data1" :display="flex" @on-select="selectOne" @on-select-all="selectAll"
+      @on-selection-change="selectChange" @on-select-cancel="selectCancel"></h-table>
   </div>
 </template>
 <script>
