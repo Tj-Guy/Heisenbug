@@ -4,7 +4,7 @@
     <div>
       <p style="font-size: 72px; font-weight: 700; line-height: 60px; color: #333333;">404</p>
       <p style="font-size: 20px; line-height: 20px; color: #555555; margin-top: 44px;">抱歉，您访问的页面不存在</p>
-      <div class="back" @click="jump('/home')">返回首页</div>
+      <div class="back" @click="jump('/')">返回首页</div>
     </div>
   </div>
 </template>
@@ -32,10 +32,12 @@ export default {
   justify-content: center;
   padding-top: 160px;
 }
+
 .not-found {
   width: 414px;
   margin-right: 60px;
 }
+
 .back {
   cursor: pointer;
   margin-top: 24px;

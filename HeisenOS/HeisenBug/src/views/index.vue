@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div>
     <div class="header">
       <p class="item active" @click="jump('/home')">/home</p>
@@ -32,5 +32,31 @@ export default {
   &.active {
     color: #047cf3;
   }
+}
+</style> -->
+
+<template>
+  <UserTable class="mt20"></UserTable>
+</template>
+
+<script>
+export default {
+  components: {
+    UserTable: () => import(/* webpackChunkName: "components/UserTable" */ "@/components/UserTable")
+  },
+};
+</script>
+
+<style lang="less" scoped>
+.pt60 {
+  padding-top: 60px;
+}
+
+.mt20 {
+  margin-top: 20px;
+}
+
+img {
+  margin: 0 auto;
 }
 </style>

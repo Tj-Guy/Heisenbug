@@ -1,12 +1,22 @@
+<script>
+import logo from "@/assets/logo.png";
+export default {
+  data() {
+    return {
+      logo
+    };
+  }
+}
+</script>
+
 <template>
   <div>
     <div class="layout">
       <h-menu mode="horizontal" theme="dark" active-name="1">
-
         <div class="layout-logo"></div>
         <div class="layout-nav">
           <h-menu-item name="1">
-            <h-icon name="mail"></h-icon>
+            <h-icon name="person-stalker"></h-icon>
             用户管理
           </h-menu-item>
           <h-menu-item name="2">
@@ -14,32 +24,39 @@
             产品管理
           </h-menu-item>
           <h-menu-item name="3">
-            <h-icon name="mail"></h-icon>
+            <h-icon name="card"></h-icon>
             业务管理
           </h-menu-item>
           <h-menu-item name="4">
-            <h-icon name="mail"></h-icon>
+            <h-icon name="person"></h-icon>
             我的账户
           </h-menu-item>
+          <img text-align="margin-right" width="50px" alt="Hundsun Design" :src="logo" />
         </div>
       </h-menu>
+
       <h-menu mode="horizontal" active-name="1">
         <div class="layout-assistant">
-          <h-menu-item name="1">二级导航</h-menu-item>
-          <h-menu-item name="2">二级导航</h-menu-item>
-          <h-menu-item name="3">二级导航</h-menu-item>
+          <h-menu-item name="1">用户管理</h-menu-item>
+          <h-menu-item name="2">产品管理</h-menu-item>
+          <h-menu-item name="3">业务管理</h-menu-item>
         </div>
       </h-menu>
+
       <div class="layout-content">
         <h-row>
           <h-col span="18">
-            <div class="layout-content-main">内容区域</div>
+            <div class="layout-content-main">
+              <router-view></router-view>
+              <!-- 内容区域 -->
+            </div>
           </h-col>
+
           <h-col span="6">
             <h-menu active-name="1-2" width="auto" :open-names="['1']">
               <h-submenu name="1">
                 <template slot="title">
-                  <h-icon name="mail"></h-icon>
+                  <h-icon name="person-stalker"></h-icon>
                   用户管理
                 </template>
                 <h-menu-item name="1-1">用户添加</h-menu-item>
@@ -56,7 +73,7 @@
               </h-submenu>
               <h-submenu name="3">
                 <template slot="title">
-                  <h-icon name="mail"></h-icon>
+                  <h-icon name="card"></h-icon>
                   业务管理
                 </template>
                 <h-menu-item name="3-1">申购</h-menu-item>
@@ -73,4 +90,3 @@
       </div>
     </div>
   </div>
-</template>
