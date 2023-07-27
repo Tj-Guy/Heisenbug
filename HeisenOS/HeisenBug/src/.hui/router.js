@@ -14,21 +14,6 @@ export default initRouter(
           component: Index,
         },
         {
-          name: 'productManage-index',
-          path: 'productManage',
-          component: ProductManageIndex,
-        },
-        {
-          name: 'TransactionManage-index',
-          path: 'TransactionManage',
-          component: TransactionManageIndex,
-        },
-        {
-          name: 'userManage-index',
-          path: 'userManage',
-          component: UserManageIndex,
-        },
-        {
           name: 'productManage-createProduct',
           path: 'productManage/createProduct',
           component: ProductManageCreateProduct,
@@ -101,21 +86,6 @@ export default initRouter(
 
 function Index() {
   return import(/* webpackChunkName: "index" */ '@/views/index.vue')
-}
-function ProductManageIndex() {
-  return import(
-    /* webpackChunkName: "productManage-index" */ '@/views/productManage/index.vue'
-  )
-}
-function TransactionManageIndex() {
-  return import(
-    /* webpackChunkName: "TransactionManage-index" */ '@/views/TransactionManage/index.vue'
-  )
-}
-function UserManageIndex() {
-  return import(
-    /* webpackChunkName: "userManage-index" */ '@/views/userManage/index.vue'
-  )
 }
 function ProductManageCreateProduct() {
   return import(

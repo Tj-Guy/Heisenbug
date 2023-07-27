@@ -67,8 +67,8 @@
                 </template>
                 <h-menu-item name="3-1" @click.native="jump('/TransactionManage/buy')">申购</h-menu-item>
                 <h-menu-item name="3-2" @click.native="jump('/TransactionManage/redeem')">赎回</h-menu-item>
-                <h-menu-item name="3-2" @click.native="jump('/TransactionManage/liquidate')">清算</h-menu-item>
-                <h-menu-item name="3-2" @click.native="jump('/TransactionManage/ordersModification')">订单查询与修改</h-menu-item>
+                <h-menu-item name="3-3" @click.native="jump('/TransactionManage/liquidate')">清算</h-menu-item>
+                <h-menu-item name="3-4" @click.native="jump('/TransactionManage/ordersModification')">订单查询与修改</h-menu-item>
               </h-submenu>
             </h-menu>
           </h-col>
@@ -88,7 +88,6 @@
     </div>
   </div>
 </template>
-this.$hCore.navigate('/productManage/createProduct')
 
 
 <script>
