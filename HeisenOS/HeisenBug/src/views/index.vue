@@ -37,6 +37,7 @@ export default {
 
 <template>
   <UserTable class="mt20"></UserTable>
+
 </template>
 
 <script>

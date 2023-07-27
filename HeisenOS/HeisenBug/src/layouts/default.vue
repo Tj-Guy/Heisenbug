@@ -1,28 +1,18 @@
-<script>
-import logo from "@/assets/logo.png";
-export default {
-  data() {
-    return {
-      logo
-    };
-  }
-}
-</script>
-
 <template>
   <div class="block">
     <div class="layout">
       <h-menu class="header" mode="horizontal" theme="dark" active-name="1">
         <div>
           <div class="layout-logo">
-            <img style="display:inline-block" width="50px" alt="Hundsun Design" :src="logo" />
+            <router-link :to="{ name: 'index' }"></router-link>
+            <img style="display:inline-block" width="50px" alt="Hundsun Design" :src="logo"/>
           </div>
           <div class="layout-nav">
             <h-menu-item name="1">
               <h-icon name="person-stalker"></h-icon>
-              <span>用户管理</span>
+              <span >用户管理</span>
             </h-menu-item>
-            <h-menu-item name="2">
+            <h-menu-item name="2" @click="alret('help')">
               <h-icon name="mail"></h-icon>
               <span>产品管理</span>
             </h-menu-item>
@@ -55,27 +45,30 @@ export default {
                   <h-icon name="person-stalker"></h-icon>
                   用户管理
                 </template>
-                <h-menu-item name="1-1">用户添加</h-menu-item>
-                <h-menu-item name="1-2">用户查询</h-menu-item>
-                <h-menu-item name="1-3">用户修改</h-menu-item>
+                <h-menu-item name="1-1" @click.native="jump('/userManage/createUser')">开户</h-menu-item>
+                <h-menu-item name="1-2" @click.native="jump('/userManage/deleteUser')">销户</h-menu-item>
+                <h-menu-item name="1-3" @click.native="jump('/userManage/searchUser')">用户查询</h-menu-item>
+                <h-menu-item name="1-4" @click.native="jump('/userManage/modifyUser')">用户修改</h-menu-item>
+                <h-menu-item name="1-5" @click.native="jump('/userManage/cardManagement')">银行卡管理</h-menu-item>
               </h-submenu>
               <h-submenu name="2">
                 <template slot="title">
                   <h-icon name="mail"></h-icon>
                   产品管理
                 </template>
-                <h-menu-item name="2-1">产品添加</h-menu-item>
-                <h-menu-item name="2-2">产品查询</h-menu-item>
+                <h-menu-item name="2-1" @click.native="jump('/productManage/createProduct')">添加产品</h-menu-item> <!-- 恒生自己没有给h-menu-item 写好click事件 用click.native 进行绑定 -->
+                <h-menu-item name="2-2" @click.native="jump('/productManage/modifyProduct')">修改/删除产品</h-menu-item>
+                <h-menu-item name="2-3" @click.native="jump('/productManage/productDetail')">查看产品列表与详细信息</h-menu-item>
               </h-submenu>
               <h-submenu name="3">
                 <template slot="title">
                   <h-icon name="card"></h-icon>
                   业务管理
                 </template>
-                <h-menu-item name="3-1">申购</h-menu-item>
-                <h-menu-item name="3-2">赎回</h-menu-item>
-                <h-menu-item name="3-2">清算</h-menu-item>
-                <h-menu-item name="3-2">查询</h-menu-item>
+                <h-menu-item name="3-1" @click.native="jump('/TransactionManage/buy')">申购</h-menu-item>
+                <h-menu-item name="3-2" @click.native="jump('/TransactionManage/redeem')">赎回</h-menu-item>
+                <h-menu-item name="3-2" @click.native="jump('/TransactionManage/liquidate')">清算</h-menu-item>
+                <h-menu-item name="3-2" @click.native="jump('/TransactionManage/ordersModification')">订单查询与修改</h-menu-item>
               </h-submenu>
             </h-menu>
           </h-col>
@@ -95,7 +88,25 @@ export default {
     </div>
   </div>
 </template>
+this.$hCore.navigate('/productManage/createProduct')
 
+
+<script>
+
+import logo from "@/assets/logo.png";
+export default {
+  data() {
+    return {
+      logo
+    };
+  },
+  methods: {
+    jump(path) {
+      this.$hCore.navigate(path)
+    }
+  }
+};
+</script>
 
 <style scoped>
   .header {
