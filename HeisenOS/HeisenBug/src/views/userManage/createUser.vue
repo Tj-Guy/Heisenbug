@@ -4,75 +4,123 @@
     <h-form
       ref="formItem1"
       :model="formItem1"
-      :label-width="80"
+      :label-width="100"
       errorFocus
-      cols="2"
+      cols="1"
     >
-      <h-form-item label="姓名" prop="input" required>
-        <h-input v-model="formItem1.input" placeholder="请输入"></h-input>
+      <h-form-item label="用户类型" prop="cType" required>
+        <h-radio-group v-model="formItem1.cType">
+          <h-radio label='1'>个人</h-radio>
+          <h-radio label='2'>企业</h-radio>
+        </h-radio-group>
       </h-form-item>
-      <h-form-item label="日期控件">
+
+      <!-- 根据用户类型显示问题与选项 -->
+      <div v-if= "formItem1.cType === '1'">
+      <h-form-item label="姓名" prop="cName" required>
+        <h-input v-model="formItem1.cName" placeholder="请输入"></h-input>
+      </h-form-item>
+      <h-form-item label="个人证件类型" prop="cIdType" required>
+        <h-select v-model="formItem1.cIdType" filterable> 
+          <h-option value="1">中华人民共和国居民身份证</h-option>
+          <h-option value="2">台湾居民来往大陆通行证</h-option>
+          <h-option value="3">港澳居民来往内地通行证</h-option>
+          <h-option value="4">外国人永久居留身份证</h-option>
+        </h-select>
+      </h-form-item>
+      </div>
+
+      <div v-else>
+        <h-form-item label="企业名称" prop="cName" required>
+          <h-input v-model="formItem1.cName" placeholder="请输入"></h-input>
+        </h-form-item>
+        <h-form-item label="企业证件类型" prop="cIdType" required>
+          <h-select v-model="formItem1.cIdType" filterable>
+            <h-option value="5">税务登记证</h-option>
+            <h-option value="6">中华人民共和国组织机构代码证</h-option>
+            <h-option value="7">营业执照</h-option>         
+        </h-select>
+      </h-form-item>
+      </div>
+
+      <!-- 统一问题 -->
+      <h-form-item label="证件号" prop="cId" required>
+        <h-input v-model="formItem1.cId" placeholder="请输入"></h-input>
+      </h-form-item>
+      <h-form-item label="证件有效期">
         <h-row>
           <h-col span="11">
-            <h-form-item prop="date" required>
+            <h-form-item prop="validDateFrom">
               <h-datePicker
                 type="date"
-                placeholder="选择日期"
-                v-model="formItem1.date"
+                placeholder="选择起始日期"
+                v-model="formItem1.validDateFrom"
               ></h-datePicker>
             </h-form-item>
           </h-col>
           <h-col span="2" style="text-align: center;">-</h-col>
           <h-col span="11">
-            <h-form-item prop="time" required>
+            <h-form-item prop="validDateTo">
               <h-timePicker
-                type="time"
-                placeholder="选择时间"
-                v-model="formItem1.time"
+                type="date"
+                placeholder="选择结束日期"
+                v-model="formItem1.validDateTo"
               ></h-timePicker>
             </h-form-item>
           </h-col>
         </h-row>
       </h-form-item>
-      <h-form-item label="选择器" prop="select" required>
-        <h-select v-model="formItem1.select" filterable>
-          <h-option value="beijing">北京市</h-option>
-          <h-option value="shanghai">上海市</h-option>
-          <h-option value="shenzhen">深圳市</h-option>
-        </h-select>
-      </h-form-item>
-      <h-form-item label="金额框" prop="money" required>
-        <h-typefield v-model="formItem1.money">
-          <h-select
-            v-model="select2"
-            placeholder=""
-            slot="append"
-            style="width: 45px;"
-            :isArrow="false"
-            :clearable="false"
-            :tranfer="true"
-          >
-            <h-option value="com">.com</h-option>
-            <h-option value="org">.org</h-option>
-            <h-option value="io">.io</h-option>
-          </h-select>
-        </h-typefield>
-      </h-form-item>
-      <h-form-item label="单选框" prop="radio" required>
-        <h-radio-group v-model="formItem1.radio">
-          <h-radio label="male">男</h-radio>
-          <h-radio label="female">女</h-radio>
+
+      <h-form-item label="风险等级" prop="cRiskLevel" required>
+        <h-radio-group v-model="formItem1.cRiskLevel">
+          <h-radio label='1'>低风险</h-radio>
+          <h-radio label='2'>中风险</h-radio>
+          <h-radio label='3'>高风险</h-radio>
         </h-radio-group>
       </h-form-item>
-      <h-form-item label="多选框" prop="checkbox" required>
+
+      <h-form-item label="电话" prop="cTel" required>
+        <h-typefield v-model="formItem1.cTel">
+        </h-typefield>
+      </h-form-item>
+      <h-form-item label="邮箱" prop="cEmail">
+        <h-input v-model="formItem1.cEmail" placeholder="请输入"></h-input>
+      </h-form-item>
+
+      <h-form-item label="省市区" prop="cascader" required>
+        <h-cascader
+          v-model="formItem1.cascader"
+          :data="data2"
+          trigger="hover"
+          style="width: 200px;"
+        ></h-cascader>
+      </h-form-item>
+      <h-form-item label="详细地址" prop="cAddress" required>
+        <h-input
+          v-model="formItem1.cAddress"
+          type="textarea"
+          :autosize="{ minRows: 2, maxRows: 5 }"
+          placeholder="请输入..."
+        ></h-input>
+      </h-form-item>
+      
+      <!-- 提交与重置取消按钮 -->
+      <h-form-item>
+        <h-button type="primary" @click="handleSubmit('formItem1')">提交</h-button>
+        <h-button type="ghost" style="margin-left: 8px;" @click="handleReset('formItem1')">重置/取消</h-button>
+      </h-form-item>
+    </h-form>
+
+      <!-- <h-form-item label="多选框" prop="checkbox" required>
         <h-checkbox-group v-model="formItem1.checkbox">
           <h-checkbox label="吃饭"></h-checkbox>
           <h-checkbox label="睡觉"></h-checkbox>
           <h-checkbox label="跑步"></h-checkbox>
           <h-checkbox label="看电影"></h-checkbox>
         </h-checkbox-group>
-      </h-form-item>
-      <h-form-item label="特殊日期" prop="fatdate" required>
+      </h-form-item> -->
+
+      <!-- <h-form-item label="特殊日期" prop="fatdate" required>
         <h-fast-date v-model="formItem1.fatdate"></h-fast-date>
       </h-form-item>
       <h-form-item label="特殊日期" prop="fatdate" required>
@@ -80,8 +128,9 @@
       </h-form-item>
       <h-form-item label="特殊日期" prop="fatdate" required>
         <h-fast-date v-model="formItem1.fatdate"></h-fast-date>
-      </h-form-item>
-      <h-form-item label="下拉表" prop="slider" required>
+      </h-form-item> -->
+
+      <!-- <h-form-item label="下拉表" prop="slider" required>
         <h-select-table v-model="formItem1.slider">
           <h-table-option
             border
@@ -99,28 +148,8 @@
           placement="top"
           placeholder="你好"
         ></h-select-tree>
-      </h-form-item>
-      <h-form-item label="文本域" prop="textarea" required>
-        <h-input
-          v-model="formItem1.textarea"
-          type="textarea"
-          :autosize="{ minRows: 2, maxRows: 5 }"
-          placeholder="请输入..."
-        ></h-input>
-      </h-form-item>
-      <h-form-item label="文本域" prop="cascader" required>
-        <h-cascader
-          v-model="formItem1.cascader"
-          :data="data2"
-          trigger="hover"
-          style="width: 200px;"
-        ></h-cascader>
-      </h-form-item>
-      <h-form-item>
-        <h-button type="primary" @click="handleSubmit('formItem1')">提交</h-button>
-        <h-button type="ghost" style="margin-left: 8px;" @click="handleReset('formItem1')">重置/取消</h-button>
-      </h-form-item>
-    </h-form>
+      </h-form-item> -->
+
   </div>
 </template>
 
@@ -131,82 +160,20 @@ export default {
       model1: "",
       changeform: false,
       formItem1: {
-        input: "",
-        select: "",
-        radio: "",
-        money: "",
-        checkbox: [],
-        fatdate: "",
-        date: "",
-        time: "",
-        slider: "",
-        tree: "",
-        textarea: "",
+        //四要素
+        cType: '',
+        cName: "",
+        cId: "",
+        cIdType: "",
+        //剩余detail
+        cRiskLevel: "",
+        validDateFrom: "",
+        validDateTo: "",
+        cTel: "",
+        cEmail:"",
+        cAddress: "",
         cascader: [],
       },
-      formItem2: {
-        input: "1",
-        select: "",
-        radio: "",
-        money: "",
-        checkbox: [],
-        fatdate: "",
-        date: "",
-        time: "",
-        slider: "",
-        tree: "",
-        textarea: "",
-      },
-      data2: [
-        {
-          value: "beijing",
-          label: "北京",
-          children: [
-            {
-              value: "gugong",
-              label: "故宫",
-            },
-            {
-              value: "tiantan",
-              label: "天坛",
-            },
-            {
-              value: "wangfujing",
-              label: "王府井",
-            },
-          ],
-        },
-        {
-          value: "jiangsu",
-          label: "江苏",
-          children: [
-            {
-              value: "nanjing",
-              label: "南京",
-              children: [
-                {
-                  value: "fuzimiao",
-                  label: "夫子庙",
-                },
-              ],
-            },
-            {
-              value: "suzhou",
-              label: "苏州",
-              children: [
-                {
-                  value: "zhuozhengyuan",
-                  label: "拙政园",
-                },
-                {
-                  value: "shizilin",
-                  label: "狮子林",
-                },
-              ],
-            },
-          ],
-        },
-      ],
       formValid: {
         user: "你好",
         stringInput: "",
@@ -236,57 +203,169 @@ export default {
           key: "address",
         },
       ],
-      data1: [
+      // data1: [
+      //   {
+      //     name: "王小明",
+      //     age: 18,
+      //     address: "北京市朝阳区芍药居",
+      //     // _highlight: true//默认选择当前项
+      //   },
+      //   {
+      //     name: "张小刚",
+      //     age: 25,
+      //     address: "北京市海淀区西二旗",
+      //   },
+      //   {
+      //     name: "李小红",
+      //     age: 30,
+      //     address: "上海市浦东新区世纪大道",
+      //   },
+      //   {
+      //     name: "周小伟",
+      //     age: 26,
+      //     address: "深圳市南山区深南大道",
+      //   },
+      // ],
+      // baseData1: [
+      //   {
+      //     title: "地区",
+      //     id: "1-0",
+      //     children: [
+      //       {
+      //         title: "child1",
+      //         id: "1-1",
+      //         children: [
+      //           {
+      //             title: "child1-1-1",
+      //             id: "1-1-1",
+      //           },
+      //           {
+      //             title: "child1-1-2",
+      //             id: "1-1-2",
+      //           },
+      //         ],
+      //       },
+      //       {
+      //         title: "child2",
+      //         id: "1-2",
+      //         children: [],
+      //       },
+      //     ],
+      //   },
+      // ],
+            data2: [
         {
-          name: "王小明",
-          age: 18,
-          address: "北京市朝阳区芍药居",
-          // _highlight: true//默认选择当前项
-        },
-        {
-          name: "张小刚",
-          age: 25,
-          address: "北京市海淀区西二旗",
-        },
-        {
-          name: "李小红",
-          age: 30,
-          address: "上海市浦东新区世纪大道",
-        },
-        {
-          name: "周小伟",
-          age: 26,
-          address: "深圳市南山区深南大道",
-        },
-      ],
-      baseData1: [
-        {
-          title: "parent",
-          id: "1-0",
+          value: "beijing",
+          label: "北京市",
           children: [
             {
-              title: "child1",
-              id: "1-1",
+              value: "chaoyang",
+              label: "朝阳区",
+            },
+            {
+              value: "dongcheng",
+              label: "东城区",
+            },
+            {
+              value: "haidian",
+              label: "海淀区",
+            },
+            {
+              value: "xicheng",
+              label: "西城区",
+            },
+          ],
+        },
+        {
+          value: "shanghai",
+          label: "上海市",
+          children: [
+            {
+              value: "hongkou",
+              label: "虹口区",
+            },
+            {
+              value: "jiading",
+              label: "嘉定区",
+            },
+            {
+              value: "jingan",
+              label: "静安区",
+            },
+            {
+              value: "putuo",
+              label: "普陀区"
+            },
+            {
+              value: "yangpu",
+              label: "杨浦区",
+            },
+          ],
+        },
+        {
+          value: "guangdong",
+          label: "广东省",
+          children: [
+            {
+              value: "guangzhou",
+              label: "广州市",
               children: [
                 {
-                  title: "child1-1-1",
-                  id: "1-1-1",
-                },
-                {
-                  title: "child1-1-2",
-                  id: "1-1-2",
+                  value: "tianhe",
+                  label: "天河区",
                 },
               ],
             },
             {
-              title: "child2",
-              id: "1-2",
-              children: [],
+              value: "shenzhen",
+              label: "深圳市",
+              children: [
+                {
+                  value: "futian",
+                  label: "福田区",
+                },
+              ],
+            },
+            {
+              value: "zhuhai",
+              label: "珠海市",
+              children: [
+                {
+                  value: "hengqin",
+                  label: "横琴区",
+                },
+              ],
+            },
+            {
+              value: "foshan",
+              label: "佛山市",
+              children: [
+                {
+                  value: "chancheng",
+                  label: "禅城区",
+                },
+                {
+                  value: "gaoming",
+                  label: "高明区",
+                },
+                {
+                  value: "nanhai",
+                  label: "南海区",
+                },
+                {
+                  value: "sanshui",
+                  label: "三水区",
+                },
+                {
+                  value: "shunde",
+                  label: "顺德区",
+                },
+              ],
             },
           ],
         },
       ],
-      firstValc: "parent",
+      firstValc: "地区",
     };
   },
   methods: {
