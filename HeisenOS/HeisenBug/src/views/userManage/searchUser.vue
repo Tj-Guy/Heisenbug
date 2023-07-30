@@ -1,13 +1,17 @@
 <!-- 用户查询-->
 
 <template>
-  <UserTable class="mt20"></UserTable>
+<div>
+  <SearchTable class="mt20"/>
+  <UserTable class="mt20"/>
+</div>
 </template>
 
 <script>
 export default {
 components: {
-    UserTable: () => import(/* webpackChunkName: "components/UserTable" */ "@/components/UserTable")
+    SearchTable: () =>import(/* webpackChunkName: "components/SearchTable" */ "@/components/SearchTable"),
+    UserTable: () => import(/* webpackChunkName: "components/UserTable" */ "@/components/UserTable"),
   },
 }
 </script>
