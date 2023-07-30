@@ -46,10 +46,7 @@
                   用户管理
                 </template>
                 <h-menu-item name="1-1" @click.native="jump('/userManage/createUser')">开户</h-menu-item>
-                <h-menu-item name="1-2" @click.native="jump('/userManage/deleteUser')">销户</h-menu-item>
-                <h-menu-item name="1-3" @click.native="jump('/userManage/searchUser')">用户查询</h-menu-item>
-                <h-menu-item name="1-4" @click.native="jump('/userManage/modifyUser')">用户修改</h-menu-item>
-                <h-menu-item name="1-5" @click.native="jump('/userManage/cardManagement')">银行卡管理</h-menu-item>
+                <h-menu-item name="1-2" @click.native="jump('/userManage/searchUser')">用户查询</h-menu-item>
               </h-submenu>
               <h-submenu name="2">
                 <template slot="title">

@@ -109,52 +109,20 @@
         <h-button type="primary" @click="handleSubmit('formItem1')">提交</h-button>
         <h-button type="ghost" style="margin-left: 8px;" @click="handleReset('formItem1')">重置/取消</h-button>
       </h-form-item>
+
+      <h-form-item>
+        <!-- 文件导入 -->
+        <FileUpdate/>
+      </h-form-item>
     </h-form>
-
-      <!-- <h-form-item label="多选框" prop="checkbox" required>
-        <h-checkbox-group v-model="formItem1.checkbox">
-          <h-checkbox label="吃饭"></h-checkbox>
-          <h-checkbox label="睡觉"></h-checkbox>
-          <h-checkbox label="跑步"></h-checkbox>
-          <h-checkbox label="看电影"></h-checkbox>
-        </h-checkbox-group>
-      </h-form-item> -->
-
-      <!-- <h-form-item label="特殊日期" prop="fatdate" required>
-        <h-fast-date v-model="formItem1.fatdate"></h-fast-date>
-      </h-form-item>
-      <h-form-item label="特殊日期" prop="fatdate" required>
-        <h-fast-date v-model="formItem1.fatdate"></h-fast-date>
-      </h-form-item>
-      <h-form-item label="特殊日期" prop="fatdate" required>
-        <h-fast-date v-model="formItem1.fatdate"></h-fast-date>
-      </h-form-item> -->
-
-      <!-- <h-form-item label="下拉表" prop="slider" required>
-        <h-select-table v-model="formItem1.slider">
-          <h-table-option
-            border
-            :columns="columns1"
-            :data="data1"
-          ></h-table-option>
-        </h-select-table>
-      </h-form-item>
-      <h-form-item label="下拉树" prop="tree" required>
-        <h-select-tree
-          v-model="formItem1.tree"
-          :first-value="firstValc"
-          style="width: 200px;"
-          :data="baseData1"
-          placement="top"
-          placeholder="你好"
-        ></h-select-tree>
-      </h-form-item> -->
-
   </div>
 </template>
 
 <script>
 export default {
+  components:{
+    FileUpdate: () => import(/* webpackChunkName: "components/FileUpdate" */ "@/components/FileUpdate")
+  },
   data() {
     return {
       model1: "",
@@ -203,57 +171,8 @@ export default {
           key: "address",
         },
       ],
-      // data1: [
-      //   {
-      //     name: "王小明",
-      //     age: 18,
-      //     address: "北京市朝阳区芍药居",
-      //     // _highlight: true//默认选择当前项
-      //   },
-      //   {
-      //     name: "张小刚",
-      //     age: 25,
-      //     address: "北京市海淀区西二旗",
-      //   },
-      //   {
-      //     name: "李小红",
-      //     age: 30,
-      //     address: "上海市浦东新区世纪大道",
-      //   },
-      //   {
-      //     name: "周小伟",
-      //     age: 26,
-      //     address: "深圳市南山区深南大道",
-      //   },
-      // ],
-      // baseData1: [
-      //   {
-      //     title: "地区",
-      //     id: "1-0",
-      //     children: [
-      //       {
-      //         title: "child1",
-      //         id: "1-1",
-      //         children: [
-      //           {
-      //             title: "child1-1-1",
-      //             id: "1-1-1",
-      //           },
-      //           {
-      //             title: "child1-1-2",
-      //             id: "1-1-2",
-      //           },
-      //         ],
-      //       },
-      //       {
-      //         title: "child2",
-      //         id: "1-2",
-      //         children: [],
-      //       },
-      //     ],
-      //   },
-      // ],
-            data2: [
+      
+          data2: [
         {
           value: "beijing",
           label: "北京市",

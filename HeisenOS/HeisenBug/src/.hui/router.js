@@ -49,24 +49,9 @@ export default initRouter(
           component: TransactionManageRedeem,
         },
         {
-          name: 'userManage-cardManagement',
-          path: 'userManage/cardManagement',
-          component: UserManageCardManagement,
-        },
-        {
           name: 'userManage-createUser',
           path: 'userManage/createUser',
           component: UserManageCreateUser,
-        },
-        {
-          name: 'userManage-deleteUser',
-          path: 'userManage/deleteUser',
-          component: UserManageDeleteUser,
-        },
-        {
-          name: 'userManage-modifyUser',
-          path: 'userManage/modifyUser',
-          component: UserManageModifyUser,
         },
         {
           name: 'userManage-searchUser',
@@ -122,24 +107,9 @@ function TransactionManageRedeem() {
     /* webpackChunkName: "TransactionManage-redeem" */ '@/views/TransactionManage/redeem.vue'
   )
 }
-function UserManageCardManagement() {
-  return import(
-    /* webpackChunkName: "userManage-cardManagement" */ '@/views/userManage/cardManagement.vue'
-  )
-}
 function UserManageCreateUser() {
   return import(
     /* webpackChunkName: "userManage-createUser" */ '@/views/userManage/createUser.vue'
-  )
-}
-function UserManageDeleteUser() {
-  return import(
-    /* webpackChunkName: "userManage-deleteUser" */ '@/views/userManage/deleteUser.vue'
-  )
-}
-function UserManageModifyUser() {
-  return import(
-    /* webpackChunkName: "userManage-modifyUser" */ '@/views/userManage/modifyUser.vue'
   )
 }
 function UserManageSearchUser() {
