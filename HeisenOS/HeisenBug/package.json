@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@hsui/core": "^1.6.1",
+    "axios": "^1.4.0",
     "h_ui": "^1.48.0"
   },
   "devDependencies": {

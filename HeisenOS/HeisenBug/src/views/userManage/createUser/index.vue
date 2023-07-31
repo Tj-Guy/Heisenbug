@@ -10,22 +10,22 @@
     >
       <h-form-item label="用户类型" prop="cType" required>
         <h-radio-group v-model="formItem1.cType">
-          <h-radio label='1'>个人</h-radio>
-          <h-radio label='2'>企业</h-radio>
+          <h-radio label= 1>个人</h-radio>
+          <h-radio label= 2>企业</h-radio>
         </h-radio-group>
       </h-form-item>
 
       <!-- 根据用户类型显示问题与选项 -->
-      <div v-if= "formItem1.cType === '1'">
+      <div v-if= "formItem1.cType == 1">
       <h-form-item label="姓名" prop="cName" required>
         <h-input v-model="formItem1.cName" placeholder="请输入"></h-input>
       </h-form-item>
       <h-form-item label="个人证件类型" prop="cIdType" required>
         <h-select v-model="formItem1.cIdType" filterable> 
-          <h-option value="1">中华人民共和国居民身份证</h-option>
-          <h-option value="2">台湾居民来往大陆通行证</h-option>
-          <h-option value="3">港澳居民来往内地通行证</h-option>
-          <h-option value="4">外国人永久居留身份证</h-option>
+          <h-option value= 1>中华人民共和国居民身份证</h-option>
+          <h-option value= 2>台湾居民来往大陆通行证</h-option>
+          <h-option value= 3>港澳居民来往内地通行证</h-option>
+          <h-option value= 4>外国人永久居留身份证</h-option>
         </h-select>
       </h-form-item>
       </div>
@@ -36,9 +36,9 @@
         </h-form-item>
         <h-form-item label="企业证件类型" prop="cIdType" required>
           <h-select v-model="formItem1.cIdType" filterable>
-            <h-option value="5">税务登记证</h-option>
-            <h-option value="6">中华人民共和国组织机构代码证</h-option>
-            <h-option value="7">营业执照</h-option>         
+            <h-option value= 5>税务登记证</h-option>
+            <h-option value= 6>中华人民共和国组织机构代码证</h-option>
+            <h-option value= 7>营业执照</h-option>         
         </h-select>
       </h-form-item>
       </div>
@@ -61,11 +61,11 @@
           <h-col span="2" style="text-align: center;">-</h-col>
           <h-col span="11">
             <h-form-item prop="validDateTo">
-              <h-timePicker
+              <h-datePicker
                 type="date"
                 placeholder="选择结束日期"
                 v-model="formItem1.validDateTo"
-              ></h-timePicker>
+              ></h-datePicker>
             </h-form-item>
           </h-col>
         </h-row>
@@ -73,14 +73,14 @@
 
       <h-form-item label="风险等级" prop="cRiskLevel" required>
         <h-radio-group v-model="formItem1.cRiskLevel">
-          <h-radio label='1'>低风险</h-radio>
-          <h-radio label='2'>中风险</h-radio>
-          <h-radio label='3'>高风险</h-radio>
+          <h-radio label= 1>低风险</h-radio>
+          <h-radio label= 2>中风险</h-radio>
+          <h-radio label= 3>高风险</h-radio>
         </h-radio-group>
       </h-form-item>
 
       <h-form-item label="电话" prop="cTel" required>
-        <h-typefield v-model="formItem1.cTel">
+        <h-typefield  type="money" integerNum=11 notFormat v-model="formItem1.cTel">
         </h-typefield>
       </h-form-item>
       <h-form-item label="邮箱" prop="cEmail">
@@ -119,6 +119,10 @@
 </template>
 
 <script>
+import axios from 'axios'
+import { newUserInfo } from '../../../api/UserManage'
+import { codeResult } from '../../../utils/tools'
+
 export default {
   components:{
     FileUpdate: () => import(/* webpackChunkName: "components/FileUpdate" */ "@/components/FileUpdate")
@@ -129,12 +133,12 @@ export default {
       changeform: false,
       formItem1: {
         //四要素
-        cType: '',
+        cType: 1,
         cName: "",
         cId: "",
-        cIdType: "",
+        cIdType: null,
         //剩余detail
-        cRiskLevel: "",
+        cRiskLevel: null,
         validDateFrom: "",
         validDateTo: "",
         cTel: "",
@@ -291,13 +295,29 @@ export default {
     changeform1() {
       this.changeform = !this.changeform;
     },
+    formSubmit() {
+      newUserInfo({
+        c_ID_type: this.formItem1.cIdType,
+        c_ID: this.formItem1.cId,
+        c_type: this.formItem1.cType,
+        c_name: this.formItem1.cName,
+        c_risk_level: this.formItem1.cRiskLevel,
+      }).then(res =>{
+        console.log(res);
+        if(res.data.resultCode == 1 || res.data.resultCode == 2){
+          this.handleReset('formItem1');
+          this.$hMessage.success("提交成功!");
+        }
+        else
+          this.$hMessage.error(codeResult(res.data.data.resultCode))
+      }); 
+    },
     handleSubmit(name) {
-      let _this = this;
       this.$refs[name].validate((valid) => {
         if (valid) {
-          _this.$hMessage.success("提交成功!");
+          this.formSubmit();
         } else {
-          _this.$hMessage.error("表单验证失败!");
+          this.$hMessage.error("表单验证失败!");
         }
       });
     },

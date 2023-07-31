@@ -5,11 +5,11 @@
       :rColumns="rightColumns"
       :lData="leftData"
       :rData="rightData"
-      :lWidth=1000
-      :rWidth=1000
+      :lWidth=450
+      :rWidth=450
       :height=500
-      :hideOperations="true"
-      :hiderTable="true"
+      :hiderTable="false"
+      :hideOperations="false"
       lTitle="用户基本信息"
       rTitle="用户银行卡管理"
       :border="true"
@@ -267,10 +267,10 @@ export default {
       return 0;
     },
     filterMethod(data, query) {
-      if(data.name.indexOf(query) > 0)
-          return data.name.indexOf(query);
+      if(data.id.indexOf(query) > 0)
+          return data.id.indexOf(query);
       else
-          return data.id.indexOf(query) > -1;
+          return data.name.indexOf(query) > -1;
     },
     resetLoading() {
       this.loading.left = !this.loading.left

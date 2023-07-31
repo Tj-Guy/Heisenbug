@@ -1,9 +1,9 @@
 <!-- 用户修改-->
 <template>
   <div>
-    <h-file-import @on-choose-file="getFile">
+    <!-- <h-file-import @on-choose-file="getFile"> -->
       <h-button type="ghost" icon="activity">导入文件</h-button>
-    </h-file-import>
+    <!-- </h-file-import> -->
     <h-table :data="data" :columns="columns" v-show="data.length">
     </h-table>
   </div>

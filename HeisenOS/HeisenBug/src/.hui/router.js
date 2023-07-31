@@ -49,14 +49,14 @@ export default initRouter(
           component: TransactionManageRedeem,
         },
         {
-          name: 'userManage-createUser',
+          name: 'userManage-createUser-index',
           path: 'userManage/createUser',
-          component: UserManageCreateUser,
+          component: UserManageCreateUserIndex,
         },
         {
-          name: 'userManage-searchUser',
+          name: 'userManage-searchUser-index',
           path: 'userManage/searchUser',
-          component: UserManageSearchUser,
+          component: UserManageSearchUserIndex,
         },
         {
           name: '__404__',
@@ -107,14 +107,14 @@ function TransactionManageRedeem() {
     /* webpackChunkName: "TransactionManage-redeem" */ '@/views/TransactionManage/redeem.vue'
   )
 }
-function UserManageCreateUser() {
+function UserManageCreateUserIndex() {
   return import(
-    /* webpackChunkName: "userManage-createUser" */ '@/views/userManage/createUser.vue'
+    /* webpackChunkName: "userManage-createUser-index" */ '@/views/userManage/createUser/index.vue'
   )
 }
-function UserManageSearchUser() {
+function UserManageSearchUserIndex() {
   return import(
-    /* webpackChunkName: "userManage-searchUser" */ '@/views/userManage/searchUser.vue'
+    /* webpackChunkName: "userManage-searchUser-index" */ '@/views/userManage/searchUser/index.vue'
   )
 }
 function __404__() {
