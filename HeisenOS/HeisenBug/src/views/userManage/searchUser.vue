@@ -3,7 +3,7 @@
 <template>
 <div>
   <SearchTable class="mt20"/>
-  <UserTable class="mt20"/>
+  <!-- <UserTable class="mt20"/> -->
 </div>
 </template>
 
@@ -19,5 +19,6 @@ components: {
 <style scoped>
 .mt20 {
   margin-top: 20px;
+  margin-left: 20px;
 }
 </style>

@@ -5,6 +5,11 @@
       :rColumns="rightColumns"
       :lData="leftData"
       :rData="rightData"
+      :lWidth=1000
+      :rWidth=1000
+      :height=500
+      :hideOperations="true"
+      :hiderTable="true"
       lTitle="用户基本信息"
       rTitle="用户银行卡管理"
       :border="true"
@@ -14,11 +19,23 @@
       :filterMethod="filterMethod"
       :filter-placeholder="搜索"
     >
-    <div :style="{ float: 'right', margin: '5px' }">
-        <h-button type="ghost" size="small" @click="reloadData">刷新</h-button>
-        <h-button type="ghost" size="small" @click.native="saveData">保存</h-button>
+    <div :style="{ float: 'right', margin: '10px' }">
+        <h-button type="primary" size="small" @click="reloadData">刷新</h-button>
+        <h-button type="error" size="small" @click="modal1 = true">删除</h-button>
+        <h-button type="success" size="small" @click.native="saveData">保存</h-button>
     </div>
     </h-transfer-table>
+    <h-msg-box v-model="modal1" width="360">
+      <div style="text-align: center;">
+        <p>是否继续删除？</p>
+      </div>
+      <p slot="footer">
+        <!-- slot内可以放任意自定义内容 -->
+        <!-- 点击取消和确定按钮时可实现自己的业务逻辑 -->
+        <h-button @click="cancelMethod">取消</h-button>
+        <h-button type="error" @click="confirmMethod">确定</h-button>
+      </p>
+    </h-msg-box>
   </div>
 </template>
 
@@ -178,47 +195,6 @@ var leftColumn = [
     transfer: true,
     rule: { required: true, message: "请选择时间", trigger: "blur,change" },
   },
-  {
-    type: "selectTree",
-    title: "下拉树",
-    width: 200,
-    key: "tree1",
-    transfer: true,
-    treeData: [
-      {
-        expand: true,
-        title: "parent 1",
-        children: [
-          {
-            title: "parent 1-0",
-            expand: true,
-            children: [
-              {
-                title: "leaf1",
-                disableCheckbox: true,
-              },
-              {
-                title: "leaf2",
-              },
-            ],
-          },
-          {
-            title: "parent 1-1",
-            expand: true,
-            checked: true,
-            children: [
-              {
-                title: "leaf3",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    showCheckbox: false,
-    checkStrictly: false,
-    rule: { required: true, message: "请选择子节点", trigger: "blur,change" },
-  },
 ];
 
 var rightColumn = [
@@ -264,31 +240,45 @@ export default {
       loading: {
         left: true,
         right: true,
-      }
+      },
+      modal1: false,
     };
   },
   methods: {
+    cancelMethod() {
+      // 可以关闭弹窗 关闭弹窗把modal置为false即可
+      this.modal1 = false;
+      // 可以实现自己的取消业务逻辑 可以不关闭弹窗
+    },
+    confirmMethod() {
+      this.deleteData()
+    },
     reloadData(){
-        this.sleep(200);
-        this.resetLoading();
-        return 0;
+      this.sleep(200);
+      this.resetLoading();
+      return 0;
+    },
+    deleteData(){
+      
+      return 0;
     },
     saveData(){
-        return 0;
+      data=this.$refs.data.getAlldata();
+      return 0;
     },
     filterMethod(data, query) {
-        if(data.name.indexOf(query) > 0)
-            return data.name.indexOf(query);
-        else
-            return data.id.indexOf(query) > -1;
+      if(data.name.indexOf(query) > 0)
+          return data.name.indexOf(query);
+      else
+          return data.id.indexOf(query) > -1;
     },
     resetLoading() {
       this.loading.left = !this.loading.left
       this.loading.right = !this.loading.right
     },
     sleep(ms) { 
-        var unixtime_ms = new Date().getTime();
-        while(new Date().getTime() < unixtime_ms + ms) {}
+      var unixtime_ms = new Date().getTime();
+      while(new Date().getTime() < unixtime_ms + ms) {}
     },
   },
 };
