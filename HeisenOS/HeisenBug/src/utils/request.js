@@ -5,7 +5,7 @@ import axios from 'axios'
 const service = axios.create({
     // 外网更新
     // baseURL: 'http://xxxxx',
-    baseURL: '/api/9091',
+    baseURL: '/api',
     headers: {},
     timeout: 5000 // request timeout
 })
