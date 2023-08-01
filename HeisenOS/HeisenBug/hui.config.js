@@ -21,15 +21,7 @@ module.exports = {
     }
   ],
   // 代理
-  proxy: {
-    '/api': {
-      target: 'http://100.80.161.41:9091',
-      pathRewrite: {
-        '^/api': '/'
-      },
-      changeOrigin: true
-    }
-  },
+  proxy: {},
   // 设置静态资源文件打包时的相对路径
   publicPath: "/",
   // 部署配置
