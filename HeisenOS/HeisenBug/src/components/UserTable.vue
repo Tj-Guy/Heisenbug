@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- 初始版用户列表 -->
     <h-table 
       border :columns="columns" :data="data" :display="flex" @on-select="selectOne" @on-select-all="selectAll"
       @on-selection-change="selectChange" @on-select-cancel="selectCancel"

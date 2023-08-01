@@ -1,14 +1,21 @@
 import request from '../utils/request'
 
+// 获取用户信息表
+export function getUserInfo() {
+    request({
+        url: '/GetAllInnerId',
+        method: 'get',
+    }).then(res => {
+        res.data.innerId
+    })
+}
+
 // 获取用户信息
 export function getUserInfo(params) {
     return request({
         url: '/GetUserInfo',
         method: 'get',
         params,
-        // headers: {
-        //     'Authorization': JSON.parse(localStorage.Authorization)
-        // }
     })
 }
 

@@ -5,6 +5,7 @@
   "dependencies": {
     "@hsui/core": "^1.6.1",
     "axios": "^1.4.0",
+    "echarts": "^5.4.3",
     "h_ui": "^1.48.0"
   },
   "devDependencies": {
