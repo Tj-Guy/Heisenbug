@@ -1,0 +1,19 @@
+{
+  "name": "HeisenBug",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@hsui/core": "^1.6.1",
+    "h_ui": "^1.48.0"
+  },
+  "devDependencies": {
+    "@hsui/plugin-lint": "^1.0.0",
+    "@hsui/plugin-micro-app": "^1.8.6",
+    "@hsui/plugin-sass": "^1.6.0"
+  },
+  "scripts": {
+    "dev": "hui dev -p 8000 -b",
+    "build": "hui build",
+    "serve": "npm run build && hui serve ./dist -p 2022"
+  }
+}

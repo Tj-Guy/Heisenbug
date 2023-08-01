@@ -1,0 +1,247 @@
+<!-- 申购-->
+<template>
+    <div class="function-body">
+        <h-card style="margin-top:10%;background-color:rgb(240, 240, 240);" shadow="true">
+            <p slot="title">基金申购</p>
+        <h-form label-position="left" :label-width="100">
+            <h-form-item label="用户内部识别码" style="margin-top:50px">
+                <h-row>
+                    <h-col offset="0" span="6">
+                        <h-input v-model='inputInfo.c_input_inner_ID' @on-change="getCustomerInfo"></h-input>
+                    </h-col>
+                    <h-col offset="1" span="8">
+                        <h-alert type="success" show-icon v-if="cInfo.c_name!=''">
+                            <p>用户姓名：{{ cInfo.c_name }}</p>
+                        </h-alert>
+                        <h-alert type="warning" show-icon v-else>不存在此用户</h-alert>
+                    </h-col>
+                </h-row>
+            </h-form-item>
+
+            <h-form-item label="申购基金代码" style="margin-top:50px">
+                <h-row>
+                    <h-col offset="0" span="6">
+                        <h-input v-model='inputInfo.f_input_id' @on-change="getFundInfo"></h-input>
+                    </h-col>
+                    <h-col offset="1" span="8">
+                        <h-alert type="success" show-icon v-if="fundInfo.f_name!=''">
+                            <p>基金代码：{{fundInfo.f_id}}</p>
+                            <p>基金名：{{fundInfo.f_name}}</p>
+                            <p>风险等级：{{fund_risk}}</p>
+                        </h-alert>
+                        <h-alert type="warning" show-icon v-else>
+                            <p>不存在此基金</p>
+                        </h-alert>
+                    </h-col>
+                </h-row>
+            </h-form-item>
+
+            <h-form-item label="申购银行卡号" style="margin-top:50px">
+               <h-row>
+                <h-col offset="0" span="6">
+                    <h-select v-model="inputInfo.c_input_card_id">
+                        <h-option
+                        v-for="item in cInfo.c_card_list"
+                        :value="item"
+                        :key="item"
+                        >{{ item }}</h-option>
+                    </h-select>
+                </h-col>
+               </h-row>
+            </h-form-item>
+
+            <h-form-item label="申购基金金额" style="margin-top:50px">
+                <h-row>
+                    <h-col offset="0" span="6">
+                        <h-input v-model='inputInfo.f_input_buy_ammount'></h-input>
+                    </h-col>
+                    <h-col offset="1" span="8" v-if="limits.invalidAmount">
+                        <h-alert type="error" show-icon>申购金额大于可用</h-alert>
+                    </h-col>
+                </h-row>
+            </h-form-item>
+        </h-form>   
+
+          <h-row style="margin-top:50px" >
+            <h-col offset="10" span="2">
+                <h-button style="margin-left:40px" type="primary" shape="circle" icon="search" @click.native="showMsgBox" v-if="ableSubmit">提交信息</h-button>
+                <h-button type="primary" shape="circle" icon="search" v-else title="有条件未满足，请检查错误信息" disabled>提交信息</h-button>
+            </h-col>
+        </h-row>
+
+            <h-msg-box
+            title="交易明细展示"
+            @on-ok="confirm_transaction"
+            @on-cancel="cancel"
+            width="500px"
+            height="600px"
+            top="150"
+            canDrag="false"
+            isOriginal="true"
+            v-model="showDetail">
+
+                <p>用户内部识别码:  {{ cInfo.c_inner_ID }}</p>
+                <p>用户姓名:       {{ cInfo.c_name }}</p>
+                <p>申购基金代码:    {{ fundInfo.f_id }}</p>
+                <p>申购基金代码:    {{ fundInfo.f_name }}</p>
+                <p>申购银行卡:      {{ inputInfo.c_input_card_id }}</p>
+                <p>申购金额:        {{ inputInfo.f_input_buy_ammount}}</p>
+
+                <div class="risk-level">
+                    <p>风险等级确认:</p>
+                    <div class="confirmation" v-if="riskLevelWarning">
+                        <h-alert type="warning" show-icon>需要进行风险确认留痕</h-alert>
+                        <h-button type="error" @click.native="goConfirmation">确认操作</h-button>
+                        <h-msg-box
+                        title="风险交易确认"
+                        @on-ok="confirm_risk"
+                        @on-cancel="cancel"
+                        width="500px"
+                        top="150"
+                        canDrag="false"
+                        isOriginal="true"
+                        v-model="showConfirmation">
+                            <p>操作员:{{ confirmInfo.admin_name }}</p>
+                            <p>用户内部识别码:{{ confirmInfo.c_inner_ID }}</p>
+                            <p>基金代码:{{ confirmInfo.f_id }}</p>
+                            <p>用户姓名:{{ cInfo.c_name }}</p>
+                            <p>操作时间:{{ confirmInfo.time }}</p>
+                        </h-msg-box>
+                    </div>
+
+                    <h-alert type="success" show-icon v-else>风险等级符合要求</h-alert>
+                </div>
+            
+            </h-msg-box>
+        </h-card>
+    </div>
+
+</template>
+
+<script>
+export default {
+    data(){
+        return{
+        showConfirmation:true,
+        subtmit:true,
+        showDetail:false,
+
+        limits:{
+            invalidAmount: false, //金额限制提示
+            riskLevelWarning: true, //风险等级再次确认
+        },//本页面所有的限制条件
+        adminInfo:{
+            'admin_name':'大味蕾',
+            'admin_id' : '999',
+        },
+        inputInfo:{
+            'c_input_inner_ID' : '',
+            'c_input_card_id':'',
+            'f_input_id':'',
+            'f_input_buy_ammount':0,
+        },
+        cInfo:{ 
+            'c_inner_ID' : '123',
+            'c_name':'小黑子',
+            'c_card_list':['987654321','53425834','4327479807'],
+            'f_id':'666',
+            'c_risk_level':3 //我们好像还没有对用户分级作出约束
+        },//伪数据 用户信息
+        cardInfo:{
+            'c_card':'987654321',
+            'card_amount':99999,
+        },//伪数据 银行卡信息
+        fundInfo:{
+            'f_id':'987',
+            'f_name':'塔姆塔基金',
+            'f_risk_level':1
+        },//伪数据 基金信息
+        confirmInfo:{
+            'admin_name':'',
+            'admin_id':'',
+            'c_inner_ID':'',
+            'f_id':'',
+            'f_input_buy_ammount':'',
+            'time':'',
+        },
+    }
+    },
+    methods:{
+        getCustomerInfo(c_input_inner_ID){
+            //在此处向后端数据库发送请求 以获取用户信息
+        },
+        getFundInfo(f_id){
+            //在此处向后端数据库发送请求 以获取基金信息
+        },
+        //检查基金风险等级与用户是否匹配
+        checkRiskLevel(){
+            if(this.cInfo.c_risk_level>this.fundInfo.f_risk_level)
+                this.riskLevelWarning=true; //需要进行风险确认留痕
+        },
+        //风险留痕
+        confirm_risk(){
+            this.confirmInfo.admin_name=this.adminInfo.admin_name
+            this.confirmInfo.admin_id=this.adminInfo.admin_id
+            this.confirmInfo.c_inner_ID=this.cInfo.c_inner_ID
+            this.confirmInfo.f_id=this.inputInfo.f_id
+            this.confirmInfo.f_input_buy_ammount=this.inputInfo.f_input_buy_ammount
+            this.confirmInfo.time=this.getCurrentTime()
+
+            //this.limits.riskLevelWarning=false//取消
+            alert('已向后端留痕')
+            //post operation
+        },
+        //确认交易 向后端post数据
+        confirm_transaction(){
+            alert('已经向后端发送请求')
+        },
+        showMsgBox(){
+            this.showDetail=true
+        },
+        checkBuyMount(input,assets){
+            let inputA=parseInt(input)
+            if (inputA>assets)
+                this.invalidAmount=true
+        },
+        goConfirmation(){
+            this.showConfirmation=true
+        }
+    },
+    components: {},
+    computed:{
+        //获取当前时间
+        getCurrentTime(){
+            return new Date()
+        },
+        ableSubmit(){
+            
+            return true
+        },
+        fund_risk(){
+            if(this.fundInfo.f_risk_level===1)
+                return '低风险'
+
+            if(this.fundInfo.f_risk_level===2)
+                return '中风险'
+            
+            if(this.fundInfo.f_risk_level===3)
+                return '高风险'
+        }
+        //检查输入金额是否小于可用金额
+    }
+};
+</script>
+
+
+<style scoped>
+.function-body{
+    margin-top: 2%;
+    margin-left: 4%;
+    display:block;
+    width:90%;
+    background-color: gray;
+}
+.input{
+    width: 300px;
+}
+</style>
