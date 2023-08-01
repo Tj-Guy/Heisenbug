@@ -1,13 +1,13 @@
 <!-- 申购-->
 <template>
     <div class="function-body">
-        <h-card style="margin-top:10%;background-color:rgb(240, 240, 240);" shadow="true">
+        <h-card style="margin-top:10%;background-color:rgb(240, 240, 240);">
             <p slot="title">基金申购</p>
         <h-form label-position="left" :label-width="100">
             <h-form-item label="用户内部识别码" style="margin-top:50px">
                 <h-row>
                     <h-col offset="0" span="6">
-                        <h-input v-model='inputInfo.c_input_inner_ID' @on-change="getCustomerInfo"></h-input>
+                        <h-input v-model='inputInfo.c_input_inner_ID' @on-change="test"></h-input>
                     </h-col>
                     <h-col offset="1" span="8">
                         <h-alert type="success" show-icon v-if="cInfo.c_name!=''">
@@ -44,7 +44,7 @@
                         v-for="item in cInfo.c_card_list"
                         :value="item"
                         :key="item"
-                        >{{ item }}</h-option>
+                        >{{ item.cardId }}</h-option>
                     </h-select>
                 </h-col>
                </h-row>
@@ -72,12 +72,9 @@
             <h-msg-box
             title="交易明细展示"
             @on-ok="confirm_transaction"
-            @on-cancel="cancel"
             width="500px"
             height="600px"
             top="150"
-            canDrag="false"
-            isOriginal="true"
             v-model="showDetail">
 
                 <p>用户内部识别码:  {{ cInfo.c_inner_ID }}</p>
@@ -89,7 +86,7 @@
 
                 <div class="risk-level">
                     <p>风险等级确认:</p>
-                    <div class="confirmation" v-if="riskLevelWarning">
+                    <div class="confirmation" v-if="limits.riskLevelWarning">
                         <h-alert type="warning" show-icon>需要进行风险确认留痕</h-alert>
                         <h-button type="error" @click.native="goConfirmation">确认操作</h-button>
                         <h-msg-box
@@ -98,8 +95,6 @@
                         @on-cancel="cancel"
                         width="500px"
                         top="150"
-                        canDrag="false"
-                        isOriginal="true"
                         v-model="showConfirmation">
                             <p>操作员:{{ confirmInfo.admin_name }}</p>
                             <p>用户内部识别码:{{ confirmInfo.c_inner_ID }}</p>
@@ -119,6 +114,8 @@
 </template>
 
 <script>
+import { Test, findBankCard, GetUserInfo } from '../../api/TransactionManage';
+
 export default {
     data(){
         return{
@@ -128,7 +125,7 @@ export default {
 
         limits:{
             invalidAmount: false, //金额限制提示
-            riskLevelWarning: true, //风险等级再次确认
+            riskLevelWarning: false, //风险等级再次确认
         },//本页面所有的限制条件
         adminInfo:{
             'admin_name':'大味蕾',
@@ -141,20 +138,19 @@ export default {
             'f_input_buy_ammount':0,
         },
         cInfo:{ 
-            'c_inner_ID' : '123',
-            'c_name':'小黑子',
-            'c_card_list':['987654321','53425834','4327479807'],
-            'f_id':'666',
+            'c_inner_ID' : '',
+            'c_name':'',
+            'c_card_list':[],
             'c_risk_level':3 //我们好像还没有对用户分级作出约束
         },//伪数据 用户信息
         cardInfo:{
             'c_card':'987654321',
-            'card_amount':99999,
+            'value':99999,
         },//伪数据 银行卡信息
         fundInfo:{
-            'f_id':'987',
-            'f_name':'塔姆塔基金',
-            'f_risk_level':1
+            'f_id':'',
+            'f_name':'',
+            'f_risk_level':0,
         },//伪数据 基金信息
         confirmInfo:{
             'admin_name':'',
@@ -167,16 +163,64 @@ export default {
     }
     },
     methods:{
-        getCustomerInfo(c_input_inner_ID){
-            //在此处向后端数据库发送请求 以获取用户信息
+        test(){
+            Test().then(res=>{console.log(res);alert(';')})
         },
-        getFundInfo(f_id){
+        getCustomerInfo(){
+            //在此处向后端数据库发送请求 以获取用户信息
+            GetUserInfo({
+                account:this.inputInfo.c_inner_ID
+            }).then(res =>{
+            console.log(res);
+            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                this.cInfo.c_name=res.data.cName 
+                this.cInfo.c_risk_level=res.data.cRiskLevel 
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.resultCode))
+      }); 
+
+            findBankCard({
+                c_inner_ID:this.inputInfo.c_inner_ID
+            }).then(res=>{
+                console.log(res)
+                if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                    for (item in res.data.info){
+                        const temp={
+                            c_card:item.cardId,
+                            value:item.value
+                        }
+                        this.cInfo.c_card_list.push(temp)
+                    }
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.data.resultCode))
+            })
+        },
+        getFundInfo(){
+            alert('hheloo')
             //在此处向后端数据库发送请求 以获取基金信息
+            getFundInfo({
+                value:this.inputInfo.f_input_id
+            }).then(res =>{
+            console.log(res);
+            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                this.fundInfo.f_id=res.data.f_id 
+                this.fundInfo.f_name=res.data.f_name
+                this.fundInfo.f_risk_level=res.data.f_risk_level
+            
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.data.resultCode))
+      }); 
         },
         //检查基金风险等级与用户是否匹配
         checkRiskLevel(){
             if(this.cInfo.c_risk_level>this.fundInfo.f_risk_level)
-                this.riskLevelWarning=true; //需要进行风险确认留痕
+                this.limits.riskLevelWarning=true; //需要进行风险确认留痕
         },
         //风险留痕
         confirm_risk(){
@@ -186,22 +230,35 @@ export default {
             this.confirmInfo.f_id=this.inputInfo.f_id
             this.confirmInfo.f_input_buy_ammount=this.inputInfo.f_input_buy_ammount
             this.confirmInfo.time=this.getCurrentTime()
-
-            //this.limits.riskLevelWarning=false//取消
             alert('已向后端留痕')
             //post operation
         },
         //确认交易 向后端post数据
         confirm_transaction(){
-            alert('已经向后端发送请求')
+            this.confirmInfo.admin_name=this.adminInfo.admin_name
+            this.confirmInfo.admin_id=this.adminInfo.admin_id
+            this.confirmInfo.c_inner_ID=this.cInfo.c_inner_ID
+            this.confirmInfo.f_id=this.inputInfo.f_id
+            this.confirmInfo.f_input_buy_ammount=this.inputInfo.f_input_buy_ammount
+            this.confirmInfo.time=this.getCurrentTime()
+            buyFund({
+                f_id:this.confirmInfo.f_id,
+                card_id:this.confirmInfo.c_card,
+                c_inner_ID:this.confirmInfo.c_inner_ID,
+                amount:this.confirmInfo.f_input_buy_ammount
+
+
+            }).then(res =>{
+            console.log(res);
+            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                alert('申购基金成功！')
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.data.resultCode))
+      }); 
         },
         showMsgBox(){
             this.showDetail=true
-        },
-        checkBuyMount(input,assets){
-            let inputA=parseInt(input)
-            if (inputA>assets)
-                this.invalidAmount=true
         },
         goConfirmation(){
             this.showConfirmation=true
