@@ -1,14 +1,25 @@
 <template>
   <div>
-    <h-table border :columns="columns4" :data="data1" :display="flex" @on-select="selectOne" @on-select-all="selectAll"
-      @on-selection-change="selectChange" @on-select-cancel="selectCancel"></h-table>
+    <h-table 
+      border :columns="columns" :data="data" :display="flex" @on-select="selectOne" @on-select-all="selectAll"
+      @on-selection-change="selectChange" @on-select-cancel="selectCancel"
+      filterable
+      filter-placeholder="搜索"
+      @on-change="handleChange3"
+      >
+      <div :style="{ float: 'right', margin: '5px' }">
+        <h-button type="ghost" size="small" @click="reloadMockData"
+          >刷新</h-button
+        >
+      </div>
+    </h-table>
   </div>
 </template>
 <script>
 export default {
   data() {
     return {
-      columns4: [
+      columns: [
         {
           type: "selection",
           width: 60,
@@ -26,8 +37,38 @@ export default {
           title: "地址",
           key: "address",
         },
+        {
+          title: "操作",
+          key: "action",
+          fixed: "right",
+          width: 120,
+          render: (h, params) => {
+            return h("div", [
+              h(
+                "Button",
+                {
+                  props: {
+                    type: "text",
+                    size: "small",
+                  },
+                },
+                "查看"
+              ),
+              h(
+                "Button",
+                {
+                  props: {
+                    type: "text",
+                    size: "small",
+                  },
+                },
+                "编辑"
+              ),
+            ]);
+          },
+        },
       ],
-      data1: [
+      data: [
         {
           name: "王小明",
           age: 18,
