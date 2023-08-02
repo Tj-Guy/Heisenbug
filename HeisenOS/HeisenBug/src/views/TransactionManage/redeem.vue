@@ -23,19 +23,19 @@
                 </h-row>
             </h-form-item>
 
-            <h-form-item label="赎回银行卡号" style="margin-top:50px" prop="c_input_card">
-                <h-row>
-                 <h-col offset="2" span="6">
-                     <h-select v-model="inputInfo.c_input_card_id">
-                         <h-option
-                         v-for="item in cInfo.c_card_list"
-                         :value="item.cardId"
-                         :key="item.cardId"
-                         >{{ item.cardId }}</h-option>
-                     </h-select>
-                 </h-col>
-                </h-row>
-             </h-form-item>
+            <h-form-item label="赎回银行卡号" style="margin-top:50px" prop="c_input_card_id">
+               <h-row>
+                <h-col offset="2" span="8">
+                    <h-select v-model="inputInfo.c_input_card_id">
+                        <h-option
+                        v-for="(item,index) in cInfo.c_card_list"
+                        :value="item.cardId"
+                        :key="item.cardId"
+                        >{{ item.cardId }}</h-option>
+                    </h-select>
+                </h-col>
+               </h-row>
+            </h-form-item>
 
             <h-form-item label="赎回基金代码" style="margin-top:50px" prop="f_input_id">
                 <h-row>
@@ -43,9 +43,8 @@
                         <h-input v-model='inputInfo.f_input_id' @on-change="getfundInAccount"></h-input>
                     </h-col>
                     <h-col offset="1" span="8">
-                        <h-alert type="success" show-icon v-if="fundInAccount.f_name!=''">
-                            <p>基金代码：{{fundInAccount.f_id}}</p>
-                            <p>基金名：{{fundInAccount.f_name}}</p>
+                        <h-alert type="success" show-icon v-if="cInfo.f_name!=''">
+                            <p>基金名：{{cInfo.f_name}}</p>
                         </h-alert>
                         <h-alert type="warning" show-icon v-else>
                             <p>该用户未购买此基金！</p>
@@ -61,13 +60,13 @@
                         <h-input v-model='inputInfo.f_input_portion'></h-input>
                         <span>
                             <div slot="content">
-                                <p>可赎回份额:{{ fundInAccount.f_portion }}</p>
+                                <p>可赎回份额:{{ cInfo.f_portion }}</p>
                             </div>
                         </span>
                     </h-col>
                     <h-col offset="1" span="8">
-                        <h-alert type="error" show-icon v-if="checkPortion">持仓份额不足</h-alert>
-                        <h-alert type="error" show-icon v-else-if="checkMin">赎回金额需大于两倍最小赎回数(最少赎回200份)</h-alert>
+                        <h-alert type="error" show-icon v-if="!checkPortion">持仓份额不足</h-alert>
+                        <h-alert type="error" show-icon v-else-if="!checkMin">赎回金额需大于两倍最小赎回数(最少赎回200份)</h-alert>
                     </h-col>
                 </h-row>
             </h-form-item>
@@ -127,21 +126,26 @@ export default {
         inputInfo:{
             'c_input_inner_ID' : '',
             'f_input_id':'',
-            'c_input_card':'',
+            'c_input_card_id':'',
             'f_input_portion':0,
         },
         cInfo:{ 
             'c_inner_ID' : '',
             'c_name':'',
             'c_card_list':[],
-            'f_id':'666',
-            'c_risk_level':3 //我们好像还没有对用户分级作出约束
+            'f_id':'',
+            'f_name':'',
+            'c_risk_level':0, //我们好像还没有对用户分级作出约束
+            'f_portion':0,
         },//伪数据 用户信息
         cardInfo:{
             'c_card':'987654321',
             'card_amount':99999,
         },//伪数据 银行卡信息
-        fundInAccount:{
+        fundInAccount:[],
+        
+        
+        temp:{
             'f_id':'',
             'c_inner_id':'',
             'c_card':'',
@@ -162,8 +166,6 @@ export default {
                 this.cInfo.c_name=res.data.cName 
                 this.cInfo.c_risk_level=res.data.cRiskLevel 
             }
-            else
-                this.$hMessage.error(codeResult(res.data.resultCode))
       }); 
 
       findBankCard({
@@ -172,88 +174,70 @@ export default {
                 console.log(res)
                 if(res.data.resultCode == 1 || res.data.resultCode == 2){
                 //将数据写入到本地
-                for (const [key, item] of Object.entries(res.data.info)) {
-                    const temp = {
-                        c_card: item.cardId,
-                        value: item.value
-                    };    
-                    this.cInfo.c_card_list.push(temp)
-                    }
+                this.cInfo.c_card_list=res.data.info
             }
-            else
-                this.$hMessage.error(codeResult(res.data.data.resultCode))
-            })
+            }
+            )
         },
         getfundInAccount(){
             //在此处向后端数据库发送请求 以获取基金信息
             getUserAccount({
                 card_id:this.inputInfo.c_input_card_id,
-                c_inner_ID:this.inputInfo.c_inner_ID
+                c_inner_ID:this.inputInfo.c_input_inner_ID
             }).then(res=>{
                 console.log(res)
-                if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                if(res.data.resultCode >-1){
                 //将数据写入到本地
+                this.fundInAccount=res.data.info
                 getFundInfo({
-                value:this.inputInfo.f_input_id
+                f_id:this.inputInfo.f_input_id
             }).then(res =>{
             console.log(res);
-            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+            if(res.data.resultCode >-1){
                 //将数据写入到本地
-                fname=res.data.f_name
+                this.cInfo.f_name=res.data.fName
+                for (let i=0;i<this.fundInAccount.length;i++){
+            if(this.inputInfo.f_input_id==this.fundInAccount[i].fId){
+                this.cInfo.f_portion=this.fundInAccount[i].fPortion
+                console.log(this.cInfo.f_portion)
+                break
             }
-            else
-                this.$hMessage.error(codeResult(res.data.data.resultCode))
+        }
+            }
       }); 
-                for (const [key, item] of Object.entries(res.data.info)) {
-                        const temp={
-                            c_inner_ID:item.cInnerId,
-                            c_card:item.cCard,
-                            f_id:item.fId,
-                            f_portion:item.fPortion,
-                            f_name:fname
-                        }
-                        this.fundInAccount.push(temp)
-                    }
             }
-            else
-                this.$hMessage.error(codeResult(res.data.data.resultCode))
             })
         },
         //确认交易 向后端post数据
         confirm_transaction(){
             sellFund({
-                f_id:this.inputInfo.f_id,
+                f_id:this.inputInfo.f_input_id,
                 card_id:this.inputInfo.c_input_card_id,
                 c_inner_ID:this.inputInfo.c_input_inner_ID,
                 portion:this.inputInfo.f_input_portion
-
             }).then(res =>{
             console.log(res);
-            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+            if(res.data.resultCode >-1){
                 //将数据写入到本地
                 this.$hMessage.success('赎回成功！')
             }
-            else
-                this.$hMessage.error(codeResult(res.data.data.resultCode))
       }); 
         },
 
         handleSubmit(name) {
             this.$refs[name].validate((valid) => {
-                var validportion=this.checkPortion()
-                var min=this.checkMin()
-        if (valid&&((!min)&&!(validportion))) {
+                let validportion=this.checkPortion
+                let min=this.checkMin
+                console.log(validportion)
+                console.log(min)
+        if (valid) {
             this.showDetail=true
         } else {
           this.$hMessage.error("请检查所填信息!");
         }
       });
     },
-        checkBuyMount(input,assets){
-            let inputA=parseInt(input)
-            if (inputA>assets)
-                this.invalidAmount=true
-        },
+        
         goConfirmation(){
             this.showConfirmation=true
         }
@@ -264,51 +248,13 @@ export default {
         getCurrentTime(){
             return new Date()
         },
-        //计算可用份额 无用
-        calPortion(){
-            let portionPossesed=0
-            for(let item in this.fundInAccount){
-                if(item.f_id==this.inputInfo.f_input_id)
-                    this.portionPossesed+=item.f_portion
-            }
-            return this.portionPossesed
-        },
-        //提交的清单
-        submitlist(){
-            let tempPortion=this.inputInfo.f_input_portion
-            let list=new Array()
-            for(let item in this.fundInAccount){
-                if(item.f_id==this.inputInfo.f_input_id)
-                    if(tempPortion>item.f_portion){
-                        tempPortion-=item.f_portion
-                        item.f_portion=0;//等下写个函数处理掉这些持仓份额为0的基金
-                        list.append({
-                            'c_inner_id':item.c_inner_ID,
-                            'c_card':item.c_card,
-                            'f_redeem_portion':item.f_portion
 
-                        })
-                    }
-                    if(tempPortion<=item.f_portion){
-                        item.f_portion-=tempPortion
-                        tempPortion=0
-                        list.push({
-                            'c_inner_id':item.c_inner_ID,
-                            'c_card':item.c_card,
-                            'f_redeem_portion':tempPortion
-                        })
-                    }
-
-            }
-            return list
-
-        },
         //检查输入金额是否小于可用金额
         checkMin(){
-            return (this.inputInfo.f_input_portion<2*this.leastRedeemPortion)
+            return (this.inputInfo.f_input_portion>=200)
         },
         checkPortion(){
-            return (this.fundInAccount.f_portion<this.inputInfo.f_input_portion)
+            return (this.cInfo.f_portion>=this.inputInfo.f_input_portion)
         },
     }
 };

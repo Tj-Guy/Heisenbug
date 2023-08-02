@@ -17,7 +17,6 @@
 
 <script>
 import * as echarts from 'echarts';
-import { codeResult } from '../../utils/tools';
 import { reCal,saveCal,cal,getNextDay } from '../../api/TransactionManage';
 export default{
   data(){
@@ -157,7 +156,6 @@ myChart.on('click', function (params) {
         // 执行点击的节点对应的函数
         
         if(params.name==='日初始化'){
-          
           alert('进行日初始化！')
           IfInit=true
           option.series[0].data.forEach(function (node) {
@@ -178,8 +176,8 @@ myChart.on('click', function (params) {
           if(ReceiveCount===true&&IfStopTransaction==true){
             alert('正在处理确认数据')
             DoData=true
-        option.series[0].data.forEach(function (node) {
-          node.itemStyle.color = node.name === params.data.name ? 'lightgreen' : node.itemStyle.color;
+            option.series[0].data.forEach(function (node) {
+            node.itemStyle.color = node.name === params.data.name ? 'lightgreen' : node.itemStyle.color;
           cal()
         });
           }else{
