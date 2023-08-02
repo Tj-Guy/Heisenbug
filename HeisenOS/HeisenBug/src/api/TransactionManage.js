@@ -43,7 +43,7 @@ export function findBankCard(params) {
 export function getTradeList(params) {
     return request({
         url: '/getTradeList',
-        method: 'get',
+        method: 'post',
         params,
     })
 }
@@ -126,11 +126,10 @@ export function cancelOrder(params) {
 // 请求参数：
 // 返回参数：返回代码
 // 上面三个接口都一个原理，我放一张图，以此类推即可
-export function saveCal(params) {
+export function saveCal() {
     return request({
         url: '/saveCal',
         method: 'get',
-        params,
     })
 }
 
@@ -139,11 +138,10 @@ export function saveCal(params) {
 // 接口请求地址：IP:9091/cal
 // 请求参数：无
 // 返回参数：返回代码，并且注意重新打开数据界面时要刷新，即重新从后台读取新的数据
-export function reCal(params) {
+export function reCal() {
     return request({
         url: '/reCal',
         method: 'get',
-        params,
     })
 }
 
@@ -152,11 +150,10 @@ export function reCal(params) {
 // 接口请求地址：IP:9091/cal
 // 请求参数：无
 // 返回参数：返回代码，并且注意重新打开数据界面时要刷新，即重新从后台读取新的数据
-export function cal(params) {
+export function cal() {
     return request({
         url: '/cal',
         method: 'get',
-        params,
     })
 }
 
@@ -174,7 +171,13 @@ export function getNextDay(params) {
 }
 
 
-
+export function getFundWorthList(params) {
+    return request({
+        url: '/getFundWorthList',
+        method: 'get',
+        params,
+    })
+}
 
 
 

@@ -10,7 +10,7 @@
         :rules="ruleValidate">
             <h-form-item label="用户识别码" style="margin-top:50px" prop="c_input_inner_ID">
                 <h-row>
-                    <h-col offset="0" span="6">
+                    <h-col offset="0" span="8">
                         <h-input v-model='inputInfo.c_input_inner_ID' @on-change="getCustomerInfo"></h-input>
                     </h-col>
                     <h-col offset="1" span="8">
@@ -24,7 +24,7 @@
 
             <h-form-item label="申购基金代码" style="margin-top:50px" prop="f_input_id">
                 <h-row>
-                    <h-col offset="0" span="6">
+                    <h-col offset="0" span="8">
                         <h-input v-model='inputInfo.f_input_id' @on-change="getCustomerFundInfo"></h-input>
                     </h-col>
                     <h-col offset="1" span="8">
@@ -42,10 +42,10 @@
 
             <h-form-item label="申购银行卡号" style="margin-top:50px" prop="c_input_card">
                <h-row>
-                <h-col offset="0" span="6">
+                <h-col offset="0" span="8">
                     <h-select v-model="inputInfo.c_input_card_id">
                         <h-option
-                        v-for="item in cInfo.c_card_list"
+                        v-for="(item,index) in cInfo.c_card_list"
                         :value="item.cardId"
                         :key="item.cardId"
                         >{{ item.cardId }}</h-option>
@@ -56,7 +56,7 @@
 
             <h-form-item label="申购基金金额" style="margin-top:50px" prop="f_input_buy_amount">
                 <h-row>
-                    <h-col offset="0" span="6">
+                    <h-col offset="0" span="8">
                         <h-input v-model='inputInfo.f_input_buy_amount' @on-change="checkAmount"></h-input>
                     </h-col>
                     <h-col offset="1" span="8" v-if="limits.invalidAmount">
@@ -89,9 +89,9 @@
 
                 <div class="risk-level">
                     <p>风险等级确认:</p>
-                    <div class="confirmation" v-if="limits.riskLevelWarning">
+                    <div class="confirmation" v-if="limits.riskLevelWarning&&showDetail">
                         <h-alert type="warning" show-icon>需要进行风险确认留痕</h-alert>
-                        <h-button type="error" @click.native="goConfirmation">确认操作</h-button>
+                        <h-button type="error" @click="goConfirmation">确认操作</h-button>
                         <h-msg-box
                         title="风险交易确认"
                         @on-ok="confirm_risk"
@@ -117,21 +117,20 @@
 </template>
 
 <script>
-import {findBankCard, GetUserInfo,getFundInfo } from '../../api/TransactionManage';
-import { codeResult } from '../../utils/tools';
+import {findBankCard, GetUserInfo,getFundInfo ,buyFund} from '../../api/TransactionManage';
 export default {
     data(){
         return{
         ruleValidate:{
-            c_input_inner_ID: [{ required: true, message: "内部识别码不能为空", trigger: "blur" }],
+            c_input_inner_ID: [{ required: true, message: "内部识别码不能为空", trigger: "blur"}],
             f_input_id: [{ required: true, message: "基金代码不能为空", trigger: "blur" }],
-            c_input_card: [{ required: true, message: "购买卡号不能为空", trigger: "blur" }],
+            c_input_card_id: [{ required: true, message: "购买卡号不能为空", trigger: "blur" }],
             f_input_buy_amount:[{ required: true, message: "购买金额不能为空", trigger: "blur" }],
         },
-        showConfirmation:true,
+        showConfirmation:false,
         subtmit:true,
         showDetail:false,
-
+        cardInfo:{},
         limits:{
             invalidAmount: false, //金额限制提示
             riskLevelWarning: false, //风险等级再次确认
@@ -150,12 +149,9 @@ export default {
             'c_inner_ID' : '',
             'c_name':'',
             'c_card_list':[],
-            'c_risk_level':3 //我们好像还没有对用户分级作出约束
+            'card_amount':0,
+            'c_risk_level':0 //我们好像还没有对用户分级作出约束
         },//伪数据 用户信息
-        cardInfo:{
-            'c_card':'987654321',
-            'value':99999,
-        },//伪数据 银行卡信息
         fundInfo:{
             'f_id':'',
             'f_name':'',
@@ -168,6 +164,7 @@ export default {
             'f_id':'',
             'f_input_buy_amount':'',
             'time':'',
+            'c_input_card_id':''
         },
     }
     },
@@ -183,8 +180,6 @@ export default {
                 this.cInfo.c_name=res.data.cName 
                 this.cInfo.c_risk_level=res.data.cRiskLevel 
             }
-            else
-                this.$hMessage.error(codeResult(res.data.resultCode))
       }); 
 
             findBankCard({
@@ -192,45 +187,36 @@ export default {
             }).then(res=>{
                 console.log(res)
                 if(res.data.resultCode == 1 || res.data.resultCode == 2){
-                //将数据写入到本地
-                for (const [key, item] of Object.entries(res.data.info)) {
-                    const temp = {
-                        c_card: item.cardId,
-                        value: item.value
-                    };    
-                    this.cInfo.c_card_list.push(temp)
-                    }
+                this.cInfo.c_card_list=res.data.info
             }
-            else
-                this.$hMessage.error(codeResult(res.data.data.resultCode))
             })
         },
-        getCustomoerFundInfo(){
+        getCustomerFundInfo(){
             //在此处向后端数据库发送请求 以获取基金信息
             getFundInfo({
-                value:this.inputInfo.f_input_id
+                f_id:this.inputInfo.f_input_id
             }).then(res =>{
             console.log(res);
-            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+            if(res.data.resultCode>-1){
                 //将数据写入到本地
-                this.fundInfo.f_id=res.data.f_id 
-                this.fundInfo.f_name=res.data.f_name
-                this.fundInfo.f_risk_level=res.data.f_risk_level
-            }
-            else
-                this.$hMessage.error(codeResult(res.data.data.resultCode))
-      });   
+                this.fundInfo.f_id=res.data.fId 
+                this.fundInfo.f_name=res.data.fName
+                this.fundInfo.f_risk_level=res.data.fRiskLevel
+
             //检查风险等级匹配情况
-            if(this.cInfo.c_risk_level>this.fundInfo.f_risk_level)
+            if(this.cInfo.c_risk_level<this.fundInfo.f_risk_level)
                 this.limits.riskLevelWarning=true; //需要进行风险确认留痕
+            }
+      });   
         },
         //风险留痕
         confirm_risk(){
             this.confirmInfo.admin_name=this.adminInfo.admin_name
             this.confirmInfo.admin_id=this.adminInfo.admin_id
-            this.confirmInfo.c_inner_ID=this.cInfo.c_inner_ID
-            this.confirmInfo.f_id=this.inputInfo.f_id
+            this.confirmInfo.c_inner_ID=this.inputInfo.c_input_inner_ID
+            this.confirmInfo.f_id=this.inputInfo.f_input_id
             this.confirmInfo.f_input_buy_amount=this.inputInfo.f_input_buy_amount
+            this.confirmInfo.c_input_card_id=this.inputInfo.c_input_card_id
             this.confirmInfo.time=this.getCurrentTime()
             this.$hMessage.success('留痕成功！')
             this.limits.riskLevelWarning=false
@@ -240,13 +226,15 @@ export default {
         confirm_transaction(){
             this.confirmInfo.admin_name=this.adminInfo.admin_name
             this.confirmInfo.admin_id=this.adminInfo.admin_id
-            this.confirmInfo.c_inner_ID=this.cInfo.c_inner_ID
-            this.confirmInfo.f_id=this.inputInfo.f_id
+            this.confirmInfo.c_inner_ID=this.inputInfo.c_input_inner_ID
+            this.confirmInfo.f_id=this.inputInfo.f_input_id
             this.confirmInfo.f_input_buy_amount=this.inputInfo.f_input_buy_amount
-            this.confirmInfo.time=this.getCurrentTime()
+            this.confirmInfo.c_input_card_id=this.inputInfo.c_input_card_id
+            this.confirmInfo.time=this.getCurrentTime
+            console.log(this.confirmInfo)
             buyFund({
                 f_id:this.confirmInfo.f_id,
-                card_id:this.confirmInfo.c_card,
+                card_id:this.confirmInfo.c_input_card_id,
                 c_inner_ID:this.confirmInfo.c_inner_ID,
                 amount:this.confirmInfo.f_input_buy_amount
             }).then(res =>{
@@ -254,8 +242,6 @@ export default {
             if(res.data.resultCode == 1 || res.data.resultCode == 2){
                 this.$hMessage.success('申购成功！')
             }
-            else
-                this.$hMessage.error(codeResult(res.data.data.resultCode))
       }); 
         },
         goConfirmation(){
@@ -264,17 +250,24 @@ export default {
         handleSubmit(name) {
             this.$refs[name].validate((valid) => {
             this.showDetail=true
-                var validportion=this.checkPortion()
-                var min=this.checkMin()
-        if (valid&&((!min)&&!(validportion))) {
+        if (valid&&!limits.invalidAmount) {
             this.showDetail=true
         } else {
+            this.showDetail=false
           this.$hMessage.error("请检查所填信息!");
         }
       });
     },
     checkAmount(){
-        return (this.inputInfo.f_input_buy_amount)
+        let amount=-1
+        for (let i=0;i<this.cInfo.c_card_list.length;i++){
+            if(this.inputInfo.c_input_card_id==this.cInfo.c_card_list[i].cardId){
+                amount=this.cInfo.c_card_list[i].value
+                break
+            }
+        }
+        console.log(amount)
+        this.limits.invalidAmount=(this.inputInfo.f_input_buy_amoun>amount)
     }
     },
     components: {},
@@ -284,7 +277,6 @@ export default {
             return new Date()
         },
         ableSubmit(){
-            
             return true
         },
         fund_risk(){
