@@ -4,8 +4,12 @@
       <h-card style="margin-top:5%;background-color:rgb(240, 240, 240);" shadow="true">
           <p slot="title">订单修改与查询</p>
         <div class="input-section" style="margin-top:20px display:inline">
-          <h-form>
-            <h-form-item label="用户内部识别码" style="margin-top:50px">
+          <h-form
+        ref="inputInfo"
+        :model="inputInfo"
+        :label-width="100"
+        :rules="ruleValidate">
+            <h-form-item label="用户识别码" style="margin-top:50px" prop="c_input_inner_ID">
               <h-row>
                   <h-col offset="0" span="6">
                     <h-input v-model='inputInfo.c_input_inner_ID' @on-change="getCustomerInfo"></h-input>
@@ -16,26 +20,41 @@
                   </h-col>
               </h-row>
             </h-form-item>
+
+            <h-form-item label="银行卡号" style="margin-top:50px" prop="c_input_card">
+              <h-row>
+                <h-col offset="0" span="6">
+                    <h-select v-model="inputInfo.c_input_card_id">
+                        <h-option
+                        v-for="item in cInfo.c_card_list"
+                        :value="item.cardId"
+                        :key="item.cardId"
+                        >{{ item.cardId }}</h-option>
+                    </h-select>
+                </h-col>
+                <h-col offset="1" span="2">
+                  <h-button type="primary" icon="search" size="large" @click="handleSubmit('inputInfo')">查询</h-button>
+                </h-col>
+               </h-row>
+           </h-form-item>
+
           </h-form>
             
         </div>
-
-        <h-button type="primary" icon="document-file" size="large" @click="exportdata">导出选中数据</h-button>
-        <div class="stream-table">
+        <br>
+        <h-button type="primary" icon="document-file" size="large" @click="exportdata">导出查询数据</h-button>
+        <div class="stream-table" v-if="showTable">
             <h-table
+            ref="table"
             height="500"
             stripe
             border
-            @on-select="selectOne"
-            @on-select-all="selectAll"
-            @on-selection-change="selectChange"
-            @on-select-cancel="selectCancel"
             :columns="columns2"
             :data="transaction_stream"></h-table>
         </div>
       </h-card>
         <div class="confirmation">
-            <h-msg-box
+                        <h-msg-box
                         title="撤单提示"
                         width="500px"
                         top="150"
@@ -59,27 +78,38 @@
 </template>
 
 <script>
+import {findBankCard, GetUserInfo,getFundInfo,cancelOrder } from '../../api/TransactionManage';
+import { codeResult } from '../../utils/tools';
 export default {
     data(){
         return{
+          ruleValidate:{
+            c_input_inner_ID: [{ required: true, message: "内部识别码不能为空", trigger: "blur" }],
+            c_input_card: [{ required: true, message: "卡号不能为空", trigger: "blur" }],
+        },
+        showTable:false,
         subtmit:false,
         showDetail:false,
         withdrawInfo:{
+            'tradetype':'',
+            'f_trade_stream_id':'',
             'f_id':'',
             'time':'',
+            'cardid':'',
+            'cinnerid':'',
         },
         adminInfo:{
             'admin_name':'大味蕾',
             'admin_id' : '999',
         },
         inputInfo:{
-            'c_input_inner_ID' : '123',
-            'f_input_id':'',
+            'c_input_inner_ID' : '',
+            'c_input_card_id':'',
         },
         cInfo:{ 
-            'c_inner_ID' : '123',
-            'c_name':'小黑子',
-            'c_card_list':['987654321','53425834','4327479807'],
+            'c_inner_ID' : '',
+            'c_name':'',
+            'c_card_list':[],
             'f_id':'666',
             'c_risk_level':3 
         },//伪数据 用户信息
@@ -88,61 +118,25 @@ export default {
             'card_amount':99999,
         },//伪数据 银行卡信息
         fundInfo:{
-            'f_id':'987',
-            'f_name':'塔姆塔基金',
-            'f_risk_level':1
+            'f_id':'',
+            'f_name':'',
+            'f_risk_level':0
         },//伪数据 基金信息
         transaction_stream:[
             {   
                 'f_transaction_stream_id':2153684,
                 'f_id':'987',
                 'c_inner_ID':'123',
-                'transaction_status':'申购',
+                'trade_type':'申购',
                 'f_transaction_date':'2023-07-29T08:30:00',
                 'f_portion':1000,
                 'f_time_value':1.87,
                 'f_total_value':0,
+                'f_status':1,
                 
-            },
-            {   
-                'f_transaction_stream_id':2153685,
-                'f_id':'954387',
-                'c_inner_ID':'123',
-                'transaction_status':'申购',
-                'f_transaction_date':'2023-07-18T15:30:00',
-                'f_portion':13000,
-                'f_time_value':27,
-                'f_total_value':0,
-                
-            },
-            {   
-                'f_transaction_stream_id':2153686,
-                'f_id':'91387',
-                'c_inner_ID':'123',
-                'transaction_status':'赎回',
-                'f_transaction_date':'22023-07-10T18:30:00',
-                'f_portion':1060,
-                'f_time_value':6.8,
-                'f_total_value':0,
-                
-            },
-            {   
-                'f_transaction_stream_id':2153687,
-                'f_id':'981797',
-                'c_inner_ID':'123',
-                'transaction_status':'申购',
-                'f_transaction_date':'2023-07-19T06:30:00',
-                'f_portion':2000,
-                'f_time_value':2.7,
-                'f_total_value':0,
             },
         ],
         columns2: [
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
         {
           title: "基金代码",
           key: "f_id",
@@ -153,7 +147,7 @@ export default {
         },
         {
           title: "交易类别",
-          key: "transaction_status",
+          key: "trade_type",
         },
         {
           title: "交易时间",
@@ -172,11 +166,17 @@ export default {
           key: "f_total_value",
         },
         {
-          title: "操作",
+          title: "交易状态",
+          key: "f_status",
+        },
+        {
+          title: "撤单",
           key: "action",
           fixed: "right",
           render: (h, params) => {
             params.row.f_total_value=params.row.f_time_value*params.row.f_portion
+            params.row.trade_type=this.calTradeType(params.row.trade_type)
+            params.row.f_status=this.calTradeStatus(params.row.f_status)
             const canWithdraw = this.canWithdrawOrder(params.row.f_transaction_date);
             return h("div", [
               h(
@@ -189,9 +189,20 @@ export default {
                   },
                   on: {
                     click: () => {
-                        this.showDetail=true
                         this.withdrawInfo.f_id=params.row.f_id
-                        alert('已经向后端发送撤单数据')
+                        this.withdrawInfo.cardid=params.row.card
+                        cancelOrder({
+                          fTradeType:this.withdrawInfo.tradetype,
+                          fTradeStreamId:this.withdrawInfo.f_trade_stream_id
+                        }).then(res =>{
+                        console.log(res);
+            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                this.showDetail=true
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.resultCode))
+      }); 
                     },
                 },
                 },
@@ -204,46 +215,78 @@ export default {
     }
     },
     methods:{
-        getCustomerInfo(c_input_inner_ID){
+      getCustomerInfo(){
             //在此处向后端数据库发送请求 以获取用户信息
+            GetUserInfo({
+                account:this.inputInfo.c_input_inner_ID
+            }).then(res =>{
+            console.log(res);
+            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                this.cInfo.c_name=res.data.cName 
+                this.cInfo.c_risk_level=res.data.cRiskLevel 
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.resultCode))
+      }); 
+
+            findBankCard({
+                c_inner_ID:this.inputInfo.c_input_inner_ID
+            }).then(res=>{
+                console.log(res)
+                if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                for (const [key, item] of Object.entries(res.data.info)) {
+                    const temp = {
+                        c_card: item.cardId,
+                        value: item.value
+                    };    
+                    this.cInfo.c_card_list.push(temp)
+                    }
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.data.resultCode))
+            })
         },
-        getFundInfo(f_id){
+        getCustomoerFundInfo(){
             //在此处向后端数据库发送请求 以获取基金信息
-        },
-        //检查基金风险等级与用户是否匹配
-        checkRiskLevel(){
-            if(this.cInfo.c_risk_level>this.fundInfo.f_risk_level)
-                this.riskLevelWarning=true; //需要进行风险确认留痕
-        },
-        //确认交易 向后端post数据
-        confirm_transaction(){
-            alert('已经向后端发送请求')
+            getFundInfo({
+                value:this.inputInfo.f_input_id
+            }).then(res =>{
+            console.log(res);
+            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                this.fundInfo.f_id=res.data.f_id 
+                this.fundInfo.f_name=res.data.f_name
+                this.fundInfo.f_risk_level=res.data.f_risk_level
+            
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.data.resultCode))
+      }); 
         },
         showMsgBox(){
             this.showDetail=true
-        },
-        checkBuyMount(input,assets){
-            let inputA=parseInt(input)
-            if (inputA>assets)
-                this.invalidAmount=true
-        },
-        goConfirmation(){
-            this.showConfirmation=true
         },
         //判断能否撤单
         canWithdrawOrder(dateTime) {
             const date = new Date(dateTime); // 将传入的时间参数转换为Date对象
             const dayOfWeek = date.getDay(); // 获取日期对应的星期几
-            const hour = date.getHours(); // 获取日期对应的小时
 
   // 获取今天的日期
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // 将时间部分设置为00:00:00
+            const today = new Date();//当前时间
+            const hour = today.getHours(); // 获取日期对应的小时
 
   //获取上一个border
             const yesterday3PM = new Date(today);
             yesterday3PM.setHours(15, 0, 0, 0);
+  
+  //今日border
+            const border=new Date(today)
+            border.setHours(15,0,0,0)
             
+            //交易窗口内
+          if(hour<15){
             if(dayOfWeek==1){//周一
                 yesterday3PM.setDate(yesterday3PM.getDate() - 3);//回溯到周五
             }else if(dayOfWeek==0){//周日
@@ -251,28 +294,56 @@ export default {
             }else {//周六
                 yesterday3PM.setDate(yesterday3PM.getDate() - 1);//回溯前一天的15:00
             }
+            //BORDERS不变
+          }else{
+            yesterday3PM.setHours(15, 0, 0, 0);//当日的15点
+          }
 
 
   // 判断是否在可以撤单的时间范围内
-  if (
-    // 上一个工作日直到当日
-    (date > yesterday3PM && date <= today)
-  ) {
+  if (date>=yesterday3PM&&date<today) {
     return true;
   } else {
     return false;
   }
 },
-    cancel(){
-        this.showDetail=false
-    },
-    exportdata(selection){
-      alert(selection[0])
+    exportdata(){
       this.$refs.table.exportCsv({
-          filename: "选择的数据",
-          data:selection
+          filename: this.cInfo.cName+' '+this.inputInfo.c_input_card_id,
         });
-    }
+    },
+
+
+    calTradeType(index){
+          if(index==1){
+            return '申购'
+          }
+          else{
+            return '赎回'
+          }
+        },
+        calTradeStatus(index){
+          if(index==1){
+            return '未成交'
+          }else if(index==2){
+            return '已撤单'
+          }else{
+            return '已成交'
+          }
+        },
+
+    handleSubmit(name) {
+      this.showTable=!this.showTable
+      this.$refs[name].validate((valid) => {
+        if (valid) {
+          this.$hMessage.success("提交成功!");
+        } else {
+          this.$hMessage.error("请检查所填信息!");
+        }
+      });
+    },
+
+
     },
     components: {},
     computed:{
@@ -280,26 +351,8 @@ export default {
         getCurrentTime(){
             return new Date()
         },
-        ableSubmit(){
-            
-            return true
-        },
-    calculatedTransactions() {
-      return this.transaction_stream.map((transaction) => {
-        return {
-          ...transaction, // 复制原始对象的属性
-          f_total_value: transaction.f_portion * transaction.f_time_value, // 计算f_total_value
-        };
-      });
-    },
     },
     watch: {
-    // 监听calculatedTransactions的变化
-    calculatedTransactions(newVal) {
-      // 在监听回调中更新原始数组
-      console.log(newVal)
-      this.transaction_stream = newVal;
-    },
   },
 };
 </script>

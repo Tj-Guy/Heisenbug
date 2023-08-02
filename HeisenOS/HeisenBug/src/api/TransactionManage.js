@@ -26,6 +26,7 @@ export function getInnerId(params) {
 }
 
 
+
 // 查找银行卡
 export function findBankCard(params) {
     return request({
@@ -79,11 +80,102 @@ export function buyFund(params) {
 // 接口请求地址：IP:9091/getFundInfo
 // 请求参数：@RequestParam(value = "fragment") String fragment
 // 返回参数：返回代码与列表
-export function getFundCode(params) {
+export function getFundInfo(params) {
     return request({
         url: '/getFundInfo',
         method: 'get',
         params,
     })
 }
+
+// 19、getUserAccount（GET）
+// 接口作用：获得指定用户卡持仓
+// 接口请求地址：IP:9091/getUserAccount
+// 请求参数：
+// @RequestParam(value = "card_id")String cardId,
+// @RequestParam(value = "c_inner_ID")int cInnerId
+// 返回参数：返回表格
+export function getUserAccount(params) {
+    return request({
+        url: '/getUserAccount',
+        method: 'get',
+        params,
+    })
+}
+
+
+
+// 18、cancelOrder（GET）
+// 接口作用：撤回当前订单列
+// 接口请求地址：IP:9091/cancelOrder
+// 请求参数：
+// @RequestParam(value = "fTradeType")int TradeMethod,
+// @RequestParam(value = "fTradeStreamId")int fTradeStreamId
+// 返回参数：返回代码
+export function cancelOrder(params) {
+    return request({
+        url: '/cancelOrder',
+        method: 'get',
+        params,
+    })
+}
+
+// 24、saveCal(GET)
+// 接口作用：最终确定清算结果
+// 接口请求地址：IP:9091/saveCal
+// 请求参数：
+// 返回参数：返回代码
+// 上面三个接口都一个原理，我放一张图，以此类推即可
+export function saveCal(params) {
+    return request({
+        url: '/saveCal',
+        method: 'get',
+        params,
+    })
+}
+
+// 23、reCal（GET）
+// 接口作用：进行重算
+// 接口请求地址：IP:9091/cal
+// 请求参数：无
+// 返回参数：返回代码，并且注意重新打开数据界面时要刷新，即重新从后台读取新的数据
+export function reCal(params) {
+    return request({
+        url: '/reCal',
+        method: 'get',
+        params,
+    })
+}
+
+// 22、cal(GET)
+// 接口作用：进行清算
+// 接口请求地址：IP:9091/cal
+// 请求参数：无
+// 返回参数：返回代码，并且注意重新打开数据界面时要刷新，即重新从后台读取新的数据
+export function cal(params) {
+    return request({
+        url: '/cal',
+        method: 'get',
+        params,
+    })
+}
+
+// 20、getNextDay（GET）
+// 接口作用：获得指定用户卡持仓
+// 接口请求地址：IP:9091/getNextDay
+// 请求参数：
+// 返回参数：返回下一天的字符串
+export function getNextDay(params) {
+    return request({
+        url: '/getNextDay',
+        method: 'get',
+        params,
+    })
+}
+
+
+
+
+
+
 

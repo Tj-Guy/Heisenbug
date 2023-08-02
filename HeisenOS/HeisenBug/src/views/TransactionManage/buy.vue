@@ -3,11 +3,15 @@
     <div class="function-body">
         <h-card style="margin-top:10%;background-color:rgb(240, 240, 240);">
             <p slot="title">基金申购</p>
-        <h-form label-position="left" :label-width="100">
-            <h-form-item label="用户内部识别码" style="margin-top:50px">
+        <h-form label-position="left" 
+        ref="inputInfo"
+        :model="inputInfo"
+        :label-width="100"
+        :rules="ruleValidate">
+            <h-form-item label="用户识别码" style="margin-top:50px" prop="c_input_inner_ID">
                 <h-row>
                     <h-col offset="0" span="6">
-                        <h-input v-model='inputInfo.c_input_inner_ID' @on-change="test"></h-input>
+                        <h-input v-model='inputInfo.c_input_inner_ID' @on-change="getCustomerInfo"></h-input>
                     </h-col>
                     <h-col offset="1" span="8">
                         <h-alert type="success" show-icon v-if="cInfo.c_name!=''">
@@ -18,10 +22,10 @@
                 </h-row>
             </h-form-item>
 
-            <h-form-item label="申购基金代码" style="margin-top:50px">
+            <h-form-item label="申购基金代码" style="margin-top:50px" prop="f_input_id">
                 <h-row>
                     <h-col offset="0" span="6">
-                        <h-input v-model='inputInfo.f_input_id' @on-change="getFundInfo"></h-input>
+                        <h-input v-model='inputInfo.f_input_id' @on-change="getCustomerFundInfo"></h-input>
                     </h-col>
                     <h-col offset="1" span="8">
                         <h-alert type="success" show-icon v-if="fundInfo.f_name!=''">
@@ -36,24 +40,24 @@
                 </h-row>
             </h-form-item>
 
-            <h-form-item label="申购银行卡号" style="margin-top:50px">
+            <h-form-item label="申购银行卡号" style="margin-top:50px" prop="c_input_card">
                <h-row>
                 <h-col offset="0" span="6">
                     <h-select v-model="inputInfo.c_input_card_id">
                         <h-option
                         v-for="item in cInfo.c_card_list"
-                        :value="item"
-                        :key="item"
+                        :value="item.cardId"
+                        :key="item.cardId"
                         >{{ item.cardId }}</h-option>
                     </h-select>
                 </h-col>
                </h-row>
             </h-form-item>
 
-            <h-form-item label="申购基金金额" style="margin-top:50px">
+            <h-form-item label="申购基金金额" style="margin-top:50px" prop="f_input_buy_amount">
                 <h-row>
                     <h-col offset="0" span="6">
-                        <h-input v-model='inputInfo.f_input_buy_ammount'></h-input>
+                        <h-input v-model='inputInfo.f_input_buy_amount' @on-change="checkAmount"></h-input>
                     </h-col>
                     <h-col offset="1" span="8" v-if="limits.invalidAmount">
                         <h-alert type="error" show-icon>申购金额大于可用</h-alert>
@@ -64,8 +68,7 @@
 
           <h-row style="margin-top:50px" >
             <h-col offset="10" span="2">
-                <h-button style="margin-left:40px" type="primary" shape="circle" icon="search" @click.native="showMsgBox" v-if="ableSubmit">提交信息</h-button>
-                <h-button type="primary" shape="circle" icon="search" v-else title="有条件未满足，请检查错误信息" disabled>提交信息</h-button>
+                <h-button style="margin-left:40px" type="primary" shape="circle" icon="search" @click="handleSubmit('inputInfo')">提交信息</h-button>
             </h-col>
         </h-row>
 
@@ -82,7 +85,7 @@
                 <p>申购基金代码:    {{ fundInfo.f_id }}</p>
                 <p>申购基金代码:    {{ fundInfo.f_name }}</p>
                 <p>申购银行卡:      {{ inputInfo.c_input_card_id }}</p>
-                <p>申购金额:        {{ inputInfo.f_input_buy_ammount}}</p>
+                <p>申购金额:        {{ inputInfo.f_input_buy_amount}}</p>
 
                 <div class="risk-level">
                     <p>风险等级确认:</p>
@@ -114,11 +117,17 @@
 </template>
 
 <script>
-import { Test, findBankCard, GetUserInfo } from '../../api/TransactionManage';
-
+import {findBankCard, GetUserInfo,getFundInfo } from '../../api/TransactionManage';
+import { codeResult } from '../../utils/tools';
 export default {
     data(){
         return{
+        ruleValidate:{
+            c_input_inner_ID: [{ required: true, message: "内部识别码不能为空", trigger: "blur" }],
+            f_input_id: [{ required: true, message: "基金代码不能为空", trigger: "blur" }],
+            c_input_card: [{ required: true, message: "购买卡号不能为空", trigger: "blur" }],
+            f_input_buy_amount:[{ required: true, message: "购买金额不能为空", trigger: "blur" }],
+        },
         showConfirmation:true,
         subtmit:true,
         showDetail:false,
@@ -135,7 +144,7 @@ export default {
             'c_input_inner_ID' : '',
             'c_input_card_id':'',
             'f_input_id':'',
-            'f_input_buy_ammount':0,
+            'f_input_buy_amount':0,
         },
         cInfo:{ 
             'c_inner_ID' : '',
@@ -157,19 +166,16 @@ export default {
             'admin_id':'',
             'c_inner_ID':'',
             'f_id':'',
-            'f_input_buy_ammount':'',
+            'f_input_buy_amount':'',
             'time':'',
         },
     }
     },
     methods:{
-        test(){
-            Test().then(res=>{console.log(res);alert(';')})
-        },
         getCustomerInfo(){
             //在此处向后端数据库发送请求 以获取用户信息
             GetUserInfo({
-                account:this.inputInfo.c_inner_ID
+                account:this.inputInfo.c_input_inner_ID
             }).then(res =>{
             console.log(res);
             if(res.data.resultCode == 1 || res.data.resultCode == 2){
@@ -182,25 +188,24 @@ export default {
       }); 
 
             findBankCard({
-                c_inner_ID:this.inputInfo.c_inner_ID
+                c_inner_ID:this.inputInfo.c_input_inner_ID
             }).then(res=>{
                 console.log(res)
                 if(res.data.resultCode == 1 || res.data.resultCode == 2){
                 //将数据写入到本地
-                    for (item in res.data.info){
-                        const temp={
-                            c_card:item.cardId,
-                            value:item.value
-                        }
-                        this.cInfo.c_card_list.push(temp)
+                for (const [key, item] of Object.entries(res.data.info)) {
+                    const temp = {
+                        c_card: item.cardId,
+                        value: item.value
+                    };    
+                    this.cInfo.c_card_list.push(temp)
                     }
             }
             else
                 this.$hMessage.error(codeResult(res.data.data.resultCode))
             })
         },
-        getFundInfo(){
-            alert('hheloo')
+        getCustomoerFundInfo(){
             //在此处向后端数据库发送请求 以获取基金信息
             getFundInfo({
                 value:this.inputInfo.f_input_id
@@ -211,14 +216,11 @@ export default {
                 this.fundInfo.f_id=res.data.f_id 
                 this.fundInfo.f_name=res.data.f_name
                 this.fundInfo.f_risk_level=res.data.f_risk_level
-            
             }
             else
                 this.$hMessage.error(codeResult(res.data.data.resultCode))
-      }); 
-        },
-        //检查基金风险等级与用户是否匹配
-        checkRiskLevel(){
+      });   
+            //检查风险等级匹配情况
             if(this.cInfo.c_risk_level>this.fundInfo.f_risk_level)
                 this.limits.riskLevelWarning=true; //需要进行风险确认留痕
         },
@@ -228,9 +230,10 @@ export default {
             this.confirmInfo.admin_id=this.adminInfo.admin_id
             this.confirmInfo.c_inner_ID=this.cInfo.c_inner_ID
             this.confirmInfo.f_id=this.inputInfo.f_id
-            this.confirmInfo.f_input_buy_ammount=this.inputInfo.f_input_buy_ammount
+            this.confirmInfo.f_input_buy_amount=this.inputInfo.f_input_buy_amount
             this.confirmInfo.time=this.getCurrentTime()
-            alert('已向后端留痕')
+            this.$hMessage.success('留痕成功！')
+            this.limits.riskLevelWarning=false
             //post operation
         },
         //确认交易 向后端post数据
@@ -239,30 +242,40 @@ export default {
             this.confirmInfo.admin_id=this.adminInfo.admin_id
             this.confirmInfo.c_inner_ID=this.cInfo.c_inner_ID
             this.confirmInfo.f_id=this.inputInfo.f_id
-            this.confirmInfo.f_input_buy_ammount=this.inputInfo.f_input_buy_ammount
+            this.confirmInfo.f_input_buy_amount=this.inputInfo.f_input_buy_amount
             this.confirmInfo.time=this.getCurrentTime()
             buyFund({
                 f_id:this.confirmInfo.f_id,
                 card_id:this.confirmInfo.c_card,
                 c_inner_ID:this.confirmInfo.c_inner_ID,
-                amount:this.confirmInfo.f_input_buy_ammount
-
-
+                amount:this.confirmInfo.f_input_buy_amount
             }).then(res =>{
             console.log(res);
             if(res.data.resultCode == 1 || res.data.resultCode == 2){
-                alert('申购基金成功！')
+                this.$hMessage.success('申购成功！')
             }
             else
                 this.$hMessage.error(codeResult(res.data.data.resultCode))
       }); 
         },
-        showMsgBox(){
-            this.showDetail=true
-        },
         goConfirmation(){
             this.showConfirmation=true
+        },
+        handleSubmit(name) {
+            this.$refs[name].validate((valid) => {
+            this.showDetail=true
+                var validportion=this.checkPortion()
+                var min=this.checkMin()
+        if (valid&&((!min)&&!(validportion))) {
+            this.showDetail=true
+        } else {
+          this.$hMessage.error("请检查所填信息!");
         }
+      });
+    },
+    checkAmount(){
+        return (this.inputInfo.f_input_buy_amount)
+    }
     },
     components: {},
     computed:{

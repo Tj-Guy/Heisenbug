@@ -1,12 +1,17 @@
 <!-- 赎回-->
 <template>
     <div class="function-body">
-        <h-card style="margin-top:10%;background-color:rgb(240, 240, 240);" shadow="true">
+        <h-card style="margin-top:10%;background-color:rgb(240, 240, 240);">
             <p slot="title">基金赎回</p>
-        <h-form label-position="left" :label-width="100">
-            <h-form-item label="用户内部识别码" style="margin-top:50px">
+        <h-form label-position="left" 
+        ref="inputInfo"
+        :model="inputInfo"
+        :label-width="100"
+        :rules="ruleValidate"
+        >
+            <h-form-item label="用户识别码" style="margin-top:50px" prop="c_input_inner_ID">
                 <h-row>
-                    <h-col offset="0" span="6">
+                    <h-col offset="2" span="6">
                         <h-input v-model='inputInfo.c_input_inner_ID' @on-change="getCustomerInfo"></h-input>
                     </h-col>
                     <h-col offset="1" span="8">
@@ -18,9 +23,23 @@
                 </h-row>
             </h-form-item>
 
-            <h-form-item label="赎回基金代码" style="margin-top:50px">
+            <h-form-item label="赎回银行卡号" style="margin-top:50px" prop="c_input_card">
                 <h-row>
-                    <h-col offset="0" span="6">
+                 <h-col offset="2" span="6">
+                     <h-select v-model="inputInfo.c_input_card_id">
+                         <h-option
+                         v-for="item in cInfo.c_card_list"
+                         :value="item.cardId"
+                         :key="item.cardId"
+                         >{{ item.cardId }}</h-option>
+                     </h-select>
+                 </h-col>
+                </h-row>
+             </h-form-item>
+
+            <h-form-item label="赎回基金代码" style="margin-top:50px" prop="f_input_id">
+                <h-row>
+                    <h-col offset="2" span="6">
                         <h-input v-model='inputInfo.f_input_id' @on-change="getfundInAccount"></h-input>
                     </h-col>
                     <h-col offset="1" span="8">
@@ -35,29 +54,16 @@
                 </h-row>
             </h-form-item>
 
-            <h-form-item label="赎回银行卡号" style="margin-top:50px">
-               <h-row>
-                <h-col offset="0" span="6">
-                    <h-select v-model="inputInfo.c_input_card_id">
-                        <h-option
-                        v-for="item in cInfo.c_card_list"
-                        :value="item"
-                        :key="item"
-                        >{{ item }}</h-option>
-                    </h-select>
-                </h-col>
-               </h-row>
-            </h-form-item>
 
-            <h-form-item label="赎回基金份额" style="margin-top:50px">
+            <h-form-item label="赎回基金份额" style="margin-top:50px" prop="f_input_portion">
                 <h-row>
-                    <h-col offset="0" span="6">
-                        <h-input v-model='inputInfo.f_portion'></h-input>
-                        <h-tool-bottom placement="bottom">
+                    <h-col offset="2" span="6">
+                        <h-input v-model='inputInfo.f_input_portion'></h-input>
+                        <span>
                             <div slot="content">
                                 <p>可赎回份额:{{ fundInAccount.f_portion }}</p>
                             </div>
-                        </h-tool-bottom>
+                        </span>
                     </h-col>
                     <h-col offset="1" span="8">
                         <h-alert type="error" show-icon v-if="checkPortion">持仓份额不足</h-alert>
@@ -69,30 +75,24 @@
 
         <h-row style="margin-top:50px" >
             <h-col offset="10" span="2">
-                <h-button style="margin-left:40px" type="primary" shape="circle" icon="search" @click.native="showMsgBox" v-if="ableSubmit">提交信息</h-button>
-                <h-button type="primary" shape="circle" icon="search" v-else title="有条件未满足，请检查错误信息" disabled>提交信息</h-button>
+                <h-button style="margin-left:40px" type="primary" shape="circle" icon="search" @click="handleSubmit('inputInfo')">提交信息</h-button>
             </h-col>
         </h-row>
 
             <h-msg-box
             title="交易明细展示"
             @on-ok="confirm_transaction"
-            @on-cancel="cancel"
             width="500px"
             top="150"
-            canDrag=false
-            isOriginal=true
             v-model="showDetail"
-            scrollable=true
             height=400>
 
-            <div class="receipt" v-for="(index,item) in fundInAccount" :key="index">
-                <p>用户内部识别码:  {{ item.c_inner_ID }}</p>
+            <div class="receipt">
+                <p>用户内部识别码:  {{ cInfo.c_inner_ID }}</p>
                 <p>用户姓名:    {{ cInfo.c_name }}</p>
-                <p>赎回基金代码:    {{ item.f_id }}</p>
-                <p>赎回基金名:  {{ fundInAccount.f_name }}</p>
+                <p>赎回基金代码:    {{ inputInfo.f_input_id }}</p>
                 <p>申购银行卡:  {{ inputInfo.c_input_card_id }}</p>
-                <p>赎回份额:    {{ item.f_redeem_portion}}</p>
+                <p>赎回份额:    {{ inputInfo.f_input_portion}}</p>
                 <br><br><br>
             </div>
 
@@ -102,9 +102,17 @@
 </template>
 
 <script>
+import { findBankCard, GetUserInfo,getFundInfo,getUserAccount,buyFund, sellFund } from '../../api/TransactionManage';
+import { codeResult } from '../../utils/tools';
 export default {
     data(){
         return{
+        ruleValidate:{
+            c_input_inner_ID: [{ required: true, message: "内部识别码不能为空", trigger: "blur" }],
+            f_input_id: [{ required: true, message: "基金代码不能为空", trigger: "blur" }],
+            c_input_card: [{ required: true, message: "购买卡号不能为空", trigger: "blur" }],
+            f_input_portion:[{ required: true, message: "赎回份额不能为空", trigger: "blur" }],
+        },
         showDetail:false,
         leastRedeemPortion:100,//最少赎回份额
         portionPossesed:2000,//持有该基金的份额
@@ -123,9 +131,9 @@ export default {
             'f_input_portion':0,
         },
         cInfo:{ 
-            'c_inner_ID' : '123',
-            'c_name':'小黑子',
-            'c_card_list':['987654321','53425834','4327479807'],
+            'c_inner_ID' : '',
+            'c_name':'',
+            'c_card_list':[],
             'f_id':'666',
             'c_risk_level':3 //我们好像还没有对用户分级作出约束
         },//伪数据 用户信息
@@ -134,29 +142,113 @@ export default {
             'card_amount':99999,
         },//伪数据 银行卡信息
         fundInAccount:{
-            'f_id':'987',
-            'c_inner_id':'123',
-            'c_card':'53425834',
-            'f_name':'塔姆塔基金',//另外再查fund的表;是否需要这项功能
-            'f_portion':2000
+            'f_id':'',
+            'c_inner_id':'',
+            'c_card':'',
+            'f_name':'',//另外再查fund的表;是否需要这项功能
+            'f_portion':0
         },//伪数据 基金信息
     }
     },
     methods:{
-        getCustomerInfo(c_input_inner_ID){
+        getCustomerInfo(){
             //在此处向后端数据库发送请求 以获取用户信息
+            GetUserInfo({
+                account:this.inputInfo.c_input_inner_ID
+            }).then(res =>{
+            console.log(res);
+            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                this.cInfo.c_name=res.data.cName 
+                this.cInfo.c_risk_level=res.data.cRiskLevel 
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.resultCode))
+      }); 
+
+      findBankCard({
+                c_inner_ID:this.inputInfo.c_input_inner_ID
+            }).then(res=>{
+                console.log(res)
+                if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                for (const [key, item] of Object.entries(res.data.info)) {
+                    const temp = {
+                        c_card: item.cardId,
+                        value: item.value
+                    };    
+                    this.cInfo.c_card_list.push(temp)
+                    }
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.data.resultCode))
+            })
         },
-        getfundInAccount(f_id){
+        getfundInAccount(){
             //在此处向后端数据库发送请求 以获取基金信息
+            getUserAccount({
+                card_id:this.inputInfo.c_input_card_id,
+                c_inner_ID:this.inputInfo.c_inner_ID
+            }).then(res=>{
+                console.log(res)
+                if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                getFundInfo({
+                value:this.inputInfo.f_input_id
+            }).then(res =>{
+            console.log(res);
+            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                fname=res.data.f_name
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.data.resultCode))
+      }); 
+                for (const [key, item] of Object.entries(res.data.info)) {
+                        const temp={
+                            c_inner_ID:item.cInnerId,
+                            c_card:item.cCard,
+                            f_id:item.fId,
+                            f_portion:item.fPortion,
+                            f_name:fname
+                        }
+                        this.fundInAccount.push(temp)
+                    }
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.data.resultCode))
+            })
         },
         //确认交易 向后端post数据
         confirm_transaction(){
-            alert('已经向后端发送请求')
+            sellFund({
+                f_id:this.inputInfo.f_id,
+                card_id:this.inputInfo.c_input_card_id,
+                c_inner_ID:this.inputInfo.c_input_inner_ID,
+                portion:this.inputInfo.f_input_portion
+
+            }).then(res =>{
+            console.log(res);
+            if(res.data.resultCode == 1 || res.data.resultCode == 2){
+                //将数据写入到本地
+                this.$hMessage.success('赎回成功！')
+            }
+            else
+                this.$hMessage.error(codeResult(res.data.data.resultCode))
+      }); 
         },
-        //展示详情框
-        showMsgBox(){
+
+        handleSubmit(name) {
+            this.$refs[name].validate((valid) => {
+                var validportion=this.checkPortion()
+                var min=this.checkMin()
+        if (valid&&((!min)&&!(validportion))) {
             this.showDetail=true
-        },
+        } else {
+          this.$hMessage.error("请检查所填信息!");
+        }
+      });
+    },
         checkBuyMount(input,assets){
             let inputA=parseInt(input)
             if (inputA>assets)
@@ -218,9 +310,6 @@ export default {
         checkPortion(){
             return (this.fundInAccount.f_portion<this.inputInfo.f_input_portion)
         },
-        ableSubmit(){
-            return (!this.checkMin&!this.checkPortion)
-        }
     }
 };
 </script>

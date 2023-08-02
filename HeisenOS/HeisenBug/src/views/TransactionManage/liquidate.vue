@@ -3,7 +3,7 @@
     <div class="body">
       <h-card style="margin-top: 2%;">
         <h-card>
-          <p slot="title">当前清算日期：</p>
+          <p slot="title">当前清算日期：{{ getCurrentTime }}</p>
         </h-card>
       <div id="main" style="height:600px;width=1000px;margin-left: 19%;margin-top: 100px;"></div>
       <div class="date">
@@ -16,8 +16,9 @@
 </template>
 
 <script>
-//import { Node, Edge } from './flowchart.js'; // 根据实际文件路径调整导入路径
 import * as echarts from 'echarts';
+import { codeResult } from '../../utils/tools';
+import { reCal,saveCal,cal,getNextDay } from '../../api/TransactionManage';
 export default{
   data(){
     return{
@@ -156,10 +157,12 @@ myChart.on('click', function (params) {
         // 执行点击的节点对应的函数
         
         if(params.name==='日初始化'){
+          
           alert('进行日初始化！')
           IfInit=true
           option.series[0].data.forEach(function (node) {
           node.itemStyle.color = node.name === params.data.name ? 'lightgreen' : node.itemStyle.color;
+          getNextDay()
         });
         }else if(params.name==='接收行情'){
           if(IfInit===true){
@@ -177,6 +180,7 @@ myChart.on('click', function (params) {
             DoData=true
         option.series[0].data.forEach(function (node) {
           node.itemStyle.color = node.name === params.data.name ? 'lightgreen' : node.itemStyle.color;
+          cal()
         });
           }else{
             alert('请先完成前置步骤(停止交易&接收行情）！')
@@ -187,6 +191,7 @@ myChart.on('click', function (params) {
             ExportData+=1
             option.series[0].data.forEach(function (node) {
           node.itemStyle.color = node.name === params.data.name ? 'lightgreen' : node.itemStyle.color;
+          reCal()
         });
           }else{
             alert('请先完成停止当日交易！')
@@ -207,6 +212,7 @@ myChart.on('click', function (params) {
             IfConfirm=true
             option.series[0].data.forEach(function (node) {
           node.itemStyle.color = node.name === params.data.name ? 'lightgreen' : node.itemStyle.color;
+          saveCal()
         });
          }else{
             alert('请先完成前置步骤（处理确认数据&导出申请数据）！')
@@ -257,6 +263,16 @@ myChart.on('click', function (params) {
   mounted(){
     this.drawChart()
 
+  },
+  computed:{
+    getCurrentTime(){
+      let today=new Date()
+      let year=today.getFullYear()
+      let month=today.getMonth()+1
+      let day=today.getDate()
+      let d=year+'年'+month+'月'+day+'日'
+      return d
+        },
   }
 }
 
