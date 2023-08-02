@@ -19,14 +19,14 @@ export default initRouter(
           component: ProductManageCreateProduct,
         },
         {
-          name: 'productManage-modifyProduct',
-          path: 'productManage/modifyProduct',
-          component: ProductManageModifyProduct,
-        },
-        {
           name: 'productManage-productDetail',
           path: 'productManage/productDetail',
           component: ProductManageProductDetail,
+        },
+        {
+          name: 'productManage-productIndex',
+          path: 'productManage/productIndex',
+          component: ProductManageProductIndex,
         },
         {
           name: 'TransactionManage-buy',
@@ -82,14 +82,14 @@ function ProductManageCreateProduct() {
     /* webpackChunkName: "productManage-createProduct" */ '@/views/productManage/createProduct.vue'
   )
 }
-function ProductManageModifyProduct() {
-  return import(
-    /* webpackChunkName: "productManage-modifyProduct" */ '@/views/productManage/modifyProduct.vue'
-  )
-}
 function ProductManageProductDetail() {
   return import(
     /* webpackChunkName: "productManage-productDetail" */ '@/views/productManage/productDetail.vue'
+  )
+}
+function ProductManageProductIndex() {
+  return import(
+    /* webpackChunkName: "productManage-productIndex" */ '@/views/productManage/productIndex.vue'
   )
 }
 function TransactionManageBuy() {

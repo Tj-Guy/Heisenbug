@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 let options = {}
 
-;['index.js', 'todos.js'].forEach((module) => {
+;['product.js'].forEach((module) => {
   resolveModule(module)
 })
 

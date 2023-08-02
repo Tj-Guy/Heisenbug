@@ -54,9 +54,8 @@
                   <h-icon name="mail"></h-icon>
                   产品管理
                 </template>
-                <h-menu-item name="2-1" @click.native="jump('/productManage/createProduct')">添加产品</h-menu-item> <!-- 恒生自己没有给h-menu-item 写好click事件 用click.native 进行绑定 -->
-                <h-menu-item name="2-2" @click.native="jump('/productManage/modifyProduct')">修改/删除产品</h-menu-item>
-                <h-menu-item name="2-3" @click.native="jump('/productManage/productDetail')">查看产品列表与详细信息</h-menu-item>
+                <h-menu-item name="2-1" @click.native="jump('/productManage/createProduct')">添加产品</h-menu-item> 
+                <h-menu-item name="2-2" @click.native="jump('/productManage/productIndex')">查看产品列表</h-menu-item> 
               </h-submenu>
               <h-submenu name="3">
                 <template slot="title">
