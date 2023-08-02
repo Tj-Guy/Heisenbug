@@ -164,10 +164,10 @@ export default {
         //   title: "总净值",
         //   key: "f_total_value",
         // },
-        // {
-        //   title: "交易状态",
-        //   key: "f_status",
-        // },
+        {
+          title: "交易状态",
+          key: "f_status",
+        },
         {
           title: "撤单",
           key: "action",
@@ -320,22 +320,40 @@ export default {
                 //console.log(res)
                 if(res.data.resultCode >-1){
                   this.transaction_stream=Array.from(res.data.info)
+                  // for(let i=0;i<res.data.info.length;i++){
+                  //   let temp={
+                  //     fTradeType:res.data.info[i].fTradeType,
+                  //     fTradeStreamId:res.data.info[i].fTradeStreamId,
+                  //     cInnerId:res.data.info[i].cInnerId,
+                  //     cCard:res.data.info[i].cCard,
+                  //     fId:res.data.info[i].fId,
+                  //     fv:res.data.info[i].fv,
+                  //     f_portion:0.0,
+                  //     f_total:0.0,
+                  //     f_time_value:0.00001,
+                  //     fStatus:res.data.info[i].fStatus,
+                  //     f_status:'',
+                  //     f_trade_type:''
+                  //   }
+                  //   this.transaction_stream.push(temp)
+                  // }
+                  // console.log(this.transaction_stream)
+
                   for(let i=0;i<this.transaction_stream.length;i++){
-                    console.log(i)
-                    this.transaction_stream[i].f_time_value='未获取'
+                    //console.log(i)
                     this.transaction_stream[i].f_status=this.calTradeStatus(this.transaction_stream[i].fStatus)
                     this.transaction_stream[i].f_trade_type=this.calTradeType(this.transaction_stream[i].fTradeType)
-                    this.transaction_stream[i].f_portion=''
-                    this.transaction_stream[i].f_total=''
-                    this.transaction_stream[i].f_time_value=''
-                      getFundWorthList({
+                    // this.transaction_stream[i].f_portion=''
+                    // this.transaction_stream[i].f_total=''
+                    // this.transaction_stream[i].f_time_value=''
+                    getFundWorthList({
                         f_id:this.transaction_stream[i].fId
                       }).then(res=>{
                         if(res.data.resultCode >-1){
                           this.money=Array.from(res.data.info)
                           if(this.transaction_stream[i].fTradeType==1){//buy
                       this.transaction_stream[i].f_total=this.transaction_stream[i].fv
-                      console.log(this.transaction_stream[i].f_total)
+                      //console.log(this.transaction_stream[i].f_total)
                       for(let j=0;j<this.money.length;j++){
                             if(this.transaction_stream[i].fDate==this.money[j].fTime){
                               this.transaction_stream[i].f_time_value=this.money[j].fTimeValue

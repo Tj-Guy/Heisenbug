@@ -99,11 +99,11 @@
                         width="500px"
                         top="150"
                         v-model="showConfirmation">
-                            <p>操作员:{{ confirmInfo.admin_name }}</p>
-                            <p>用户内部识别码:{{ confirmInfo.c_inner_ID }}</p>
-                            <p>基金代码:{{ confirmInfo.f_id }}</p>
+                            <p>操作员:{{ adminInfo.admin_name }}</p>
+                            <p>用户内部识别码:{{ inputInfo.c_input_inner_ID }}</p>
+                            <p>基金代码:{{ fundInfo.f_id }}</p>
                             <p>用户姓名:{{ cInfo.c_name }}</p>
-                            <p>操作时间:{{ confirmInfo.time }}</p>
+                            <p>操作时间:{{ getCurrentTime }}</p>
                         </h-msg-box>
                     </div>
 
@@ -211,19 +211,20 @@ export default {
         },
         //风险留痕
         confirm_risk(){
-            this.confirmInfo.admin_name=this.adminInfo.admin_name
-            this.confirmInfo.admin_id=this.adminInfo.admin_id
-            this.confirmInfo.c_inner_ID=this.inputInfo.c_input_inner_ID
-            this.confirmInfo.f_id=this.inputInfo.f_input_id
-            this.confirmInfo.f_input_buy_amount=this.inputInfo.f_input_buy_amount
-            this.confirmInfo.c_input_card_id=this.inputInfo.c_input_card_id
-            this.confirmInfo.time=this.getCurrentTime()
+            // this.confirmInfo.admin_name=this.adminInfo.admin_name
+            // this.confirmInfo.admin_id=this.adminInfo.admin_id
+            // this.confirmInfo.c_inner_ID=this.inputInfo.c_input_inner_ID
+            // this.confirmInfo.f_id=this.inputInfo.f_input_id
+            // this.confirmInfo.f_input_buy_amount=this.inputInfo.f_input_buy_amount
+            // this.confirmInfo.c_input_card_id=this.inputInfo.c_input_card_id
+            // this.confirmInfo.time=this.getCurrentTime()
             this.$hMessage.success('留痕成功！')
             this.limits.riskLevelWarning=false
             //post operation
         },
         //确认交易 向后端post数据
         confirm_transaction(){
+            if(this.limits.riskLevelWarning==false){
             this.confirmInfo.admin_name=this.adminInfo.admin_name
             this.confirmInfo.admin_id=this.adminInfo.admin_id
             this.confirmInfo.c_inner_ID=this.inputInfo.c_input_inner_ID
@@ -232,6 +233,7 @@ export default {
             this.confirmInfo.c_input_card_id=this.inputInfo.c_input_card_id
             this.confirmInfo.time=this.getCurrentTime
             console.log(this.confirmInfo)
+
             buyFund({
                 f_id:this.confirmInfo.f_id,
                 card_id:this.confirmInfo.c_input_card_id,
@@ -243,6 +245,9 @@ export default {
                 this.$hMessage.success('申购成功！')
             }
       }); 
+    }else{
+        this.$hMessage.error('请先完成留痕操作！！')
+    }
         },
         goConfirmation(){
             this.showConfirmation=true
@@ -268,7 +273,7 @@ export default {
         }
         console.log(amount)
         this.limits.invalidAmount=(this.inputInfo.f_input_buy_amoun>amount)
-    }
+        }
     },
     components: {},
     computed:{
