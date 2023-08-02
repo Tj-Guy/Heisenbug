@@ -11,7 +11,7 @@
 export default {
 components: {
     SearchTable: () =>import(/* webpackChunkName: "components/SearchTable" */ "@/components/SearchTable"),
-    UserTable: () => import(/* webpackChunkName: "components/UserTable" */ "@/components/UserTable"),
+    //UserTable: () => import(/* webpackChunkName: "components/UserTable" */ "@/components/UserTable"),
   },
 }
 </script>

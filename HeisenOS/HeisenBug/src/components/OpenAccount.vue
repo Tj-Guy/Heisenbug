@@ -118,8 +118,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { newUserInfo } from '../api/UserManage'
+import { newUserInfo, changeUserInfo } from '../api/UserManage'
 import { codeResult } from '../utils/tools'
 
 export default {
@@ -291,9 +290,19 @@ export default {
     };
   },
   methods: {
-    changeform1() {
-      this.changeform = !this.changeform;
+    //在创建用户成功后，补充详细信息提交，已确保正确，提高效率
+    detailSubmit(cInnerId){
+      changeUserInfo({
+        c_inner_ID: cInnerId,
+        c_risk_level: this.formItem1.cRiskLevel,
+        c_address: this.formItem1.cAddress,
+        c_email: this.formItem1.cEmail,
+        c_tel: this.formItem1.cTel,
+        c_represent_ID_type: 0,
+        c_represent_ID: "",
+      });
     },
+    //提交创建申请
     formSubmit() {
       newUserInfo({
         c_ID_type: this.formItem1.cIdType,
@@ -302,8 +311,10 @@ export default {
         c_name: this.formItem1.cName,
         c_risk_level: this.formItem1.cRiskLevel,
       }).then(res =>{
+        console.log("newUserInfo-respond:")
         console.log(res);
         if(res.data.resultCode == 1 || res.data.resultCode == 2){
+          this.detailSubmit(res.data.cInnerId);
           this.handleReset('formItem1');
           this.$hMessage.success("提交成功!");
         }
@@ -311,6 +322,7 @@ export default {
           this.$hMessage.error(codeResult(res.data.resultCode))
       }); 
     },
+    //进行表单验证
     handleSubmit(name) {
       this.$refs[name].validate((valid) => {
         if (valid) {
@@ -320,6 +332,7 @@ export default {
         }
       });
     },
+    //表单重置
     handleReset(name) {
       this.$refs[name].resetFields();
     },

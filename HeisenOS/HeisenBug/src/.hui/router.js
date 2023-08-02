@@ -49,6 +49,11 @@ export default initRouter(
           component: TransactionManageRedeem,
         },
         {
+          name: 'userManage-bankCard-index',
+          path: 'userManage/bankCard',
+          component: UserManageBankCardIndex,
+        },
+        {
           name: 'userManage-createUser-index',
           path: 'userManage/createUser',
           component: UserManageCreateUserIndex,
@@ -105,6 +110,11 @@ function TransactionManageOrdersModification() {
 function TransactionManageRedeem() {
   return import(
     /* webpackChunkName: "TransactionManage-redeem" */ '@/views/TransactionManage/redeem.vue'
+  )
+}
+function UserManageBankCardIndex() {
+  return import(
+    /* webpackChunkName: "userManage-bankCard-index" */ '@/views/userManage/bankCard/index.vue'
   )
 }
 function UserManageCreateUserIndex() {
