@@ -14,7 +14,7 @@
             </h-menu-item>
             <h-menu-item name="2" @click="alret('help')">
               <h-icon name="mail"></h-icon>
-              <span>产品管理</span>
+              <span>我的消息</span>
             </h-menu-item>
             <h-menu-item name="3">
               <h-icon name="card"></h-icon>
@@ -47,6 +47,7 @@
                 </template>
                 <h-menu-item name="1-1" @click.native="jump('/userManage/createUser')">开户</h-menu-item>
                 <h-menu-item name="1-2" @click.native="jump('/userManage/searchUser')">用户查询</h-menu-item>
+                <h-menu-item name="1-3" @click.native="jump('/userManage/bankCard')">银行卡管理</h-menu-item>
               </h-submenu>
               <h-submenu name="2">
                 <template slot="title">

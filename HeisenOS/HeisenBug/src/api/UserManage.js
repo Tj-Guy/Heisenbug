@@ -78,6 +78,8 @@ export function getInnerId(params) {
 }
 
 // 用户绑卡
+// @RequestParam(value = "c_inner_ID") int cInnerId,
+// @RequestParam(value = "card_id") String cardId
 export function bindBankCard(params) {
     return request({
         url: '/bindBankCard',
@@ -87,6 +89,7 @@ export function bindBankCard(params) {
 }
 
 // 查找银行卡
+// @RequestParam(value = "c_inner_ID") int cInnerId,
 export function findBankCard(params) {
     return request({
         url: '/findBankCard',
@@ -96,6 +99,8 @@ export function findBankCard(params) {
 }
 
 // 银行卡充值
+// @RequestParam(value = "card_id") String cardId,
+// @RequestParam(value = "amount") float amount
 export function rechargeCard(params) {
     return request({
         url: '/rechargeCard',
@@ -105,10 +110,25 @@ export function rechargeCard(params) {
 }
 
 // 银行卡解绑
+// @RequestParam(value = "c_inner_ID") int cInnerId,
+// @RequestParam(value = "card_id") String cardId
 export function dismissBankCard(params) {
     return request({
         url: '/bindBankCard',
         method: 'post',
+        params,
+    })
+}
+
+
+//获得指定用户卡持仓
+// 请求参数：
+// @RequestParam(value = "card_id") String cardId,
+// @RequestParam(value = "c_inner_ID") int cInnerId
+export function getUserAccount(params) {
+    return request({
+        url: '/getUserAccount',
+        method: 'get',
         params,
     })
 }

@@ -1,283 +1,105 @@
 <template>
-  <div class="mt20">
-    <!-- 使用穿梭表格展示用户信息和银行卡持仓余额信息 -->
-    <!-- 功能：查询（模糊搜索，证件号或名称），修改，删除 -->
-    <!-- 添加了loading刷新特效 -->
-    <!-- hiderTable,hideOperations可以选择隐藏右边表格和操作按钮 -->
-    <h-transfer-table
-      ref="transferTable"
-      :lColumns="leftColumns"
-      :rColumns="rightColumns"
-      :lData="leftData"
-      :rData="rightData"
-      :option="riskLevelOptions"
-      :operations="['用户', '银行卡', 'all left', 'all right']"
-      :lWidth=450
-      :rWidth=450
-      :height=500
-      :hiderTable="false" 
-      :hideOperations="false"
-      lTitle="用户基本信息"
-      rTitle="用户银行卡管理"
-      :border="true"
-      :loading="loading"
-      :stripe="true"
-      filterable
-      :filterMethod="filterMethod"
-      @on-change="handleChange3"
-    >
-    <div :style="{ float: 'right', margin: '10px' }">
-        <h-button type="primary" size="small" @click="reloadData">刷新</h-button>
-        <h-button type="error" size="small" @click="deleteData">删除</h-button>
-        <h-button type="success" size="small" @click.native="saveData">保存</h-button>
-    </div>
-    </h-transfer-table>
-    <h-msg-box v-model="modal1" width="360">
-      <div style="text-align: center;">
-        <p>是否继续删除？</p>
+  <div>
+    <h-form :model="bankForm" :label-width="80">
+      <h-form-item label="用户名" required>
+        <h-input v-model="bankForm.cName" placeholder="请输入"></h-input>
+      </h-form-item>
+
+      <h-form-item label="证件号" required>
+        <h-input v-model="bankForm.cId" placeholder="请输入"></h-input>
+      </h-form-item>
+
+      <h-form-item label="操作类型" prop="operation" required>
+        <h-radio-group v-model="bankForm.operation">
+          <h-radio label= 1>绑卡</h-radio>
+          <h-radio label= 2>解绑</h-radio>
+          <h-radio label= 3>充值</h-radio>
+        </h-radio-group>
+      </h-form-item>
+
+      <h-form-item label="卡号" required>
+        <h-input v-model="bankForm.cardId" placeholder="请输入"></h-input>
+      </h-form-item>
+
+      <!-- 根据用户类型显示问题与选项 -->
+      <div v-if= "formItem1.operation == 3">
+        <h-form-item label="充值金额" required>
+        <h-input v-model="bankForm.value" placeholder="请输入"></h-input>
+      </h-form-item>
       </div>
-      <p slot="footer">
-        <!-- slot内可以放任意自定义内容 -->
-        <!-- 点击取消和确定按钮时可实现自己的业务逻辑 -->
-        <h-button @click="cancelMethod">取消</h-button>
-        <h-button type="error" @click="confirmMethod">确定</h-button>
-      </p>
-    </h-msg-box>
+
+      <h-form-item>
+        <h-button type="primary" @click="handleSubmit('formItem1')">提交</h-button>
+        <h-button type="ghost" style="margin-left: 8px;" @click="handleReset('formItem1')">取消</h-button>
+      </h-form-item>
+    </h-form>
   </div>
 </template>
 
 <script>
-var leftData = [
-  {
-    cName: "王小明",
-    cId: "440602200309081218",
-    cAddress: "北京市朝阳区芍药居",
-    cRiskLevel: "低风险",
-    cEmail: "1306134022@gmail.com",
-    cTel: "12327382282",
-    money: "120.00",
-    cardId: "6223 5678 1234 5678",
-    asset: "易方达基金",
-  }
-];
-
-var rightData = [];
-
-var leftColumn = [
-  {
-    type: "selection",
-    width: 50,
-  },
-  {
-    type: "text",
-    title: "用户名称",
-    key: "cName",
-    width: 90,
-    rule: { required: true, message: "姓名不能为空" },
-    typeWidth: 80,
-    noEdit:true,
-  },
-  {
-    type: "text",
-    title: "证件号",
-    width: 160,
-    key: "cId",
-    hiddenCol: false,
-    rule: { required: true, message: "年龄不能为空" },
-    typeWidth: 100,
-    noEdit:true,
-  },
-  {
-    type: "textArea",
-    rows: 2,
-    width: 200,
-    title: "地址",
-    key: "cAddress",
-    rule: { required: true, message: "地址不能为空" },
-  },
-  {
-    type: "text",
-    width: 160,
-    title: "邮箱",
-    key: "cEmail",
-    rule: { required: true, message: "地址不能为空" },
-  },
-  {
-    type: "text",
-    width: 160,
-    title: "电话",
-    key: "cTel",
-    rule: { required: true, message: "地址不能为空" },
-  },
-  {
-    type: "select",
-    title: "适应风险",
-    width: 200,
-    key: "cRiskLevel",
-    multiple: false,
-    transfer: true,
-    rule: { required: true, message: "请选择等级", trigger: "blur,change" },
-  },
-];
-
-var rightColumn = [
-  {
-    type: "selection",
-    width: 50,
-  },
-  {
-    type: "text",
-    title: "用户名称",
-    key: "cName",
-    width: 80,
-    rule: { required: true, message: "姓名不能为空" },
-    typeWidth: 60,
-  },
-  {
-    type: "card",
-    title: "卡号",
-    key: "cardId",
-    width: 160,
-    rule: { required: true, message: "卡号不能为空" },
-  },
-  {
-    type: "money",
-    title: "余额",
-    width: 120,
-    integerNum: 14,
-    suffixNum: 3,
-    // suffixNum: 2,
-    bigTips: true,
-    key: "money",
-    rule: { required: true, message: "金额不能为空" },
-  },
-  {
-    type: "text",
-    title: "持仓",
-    width: 200,
-    key: "asset",
-    showCheckbox: false,
-    checkStrictly: false,
-    transfer: true,
-    noEdit:true,
-  },
-];
-
-import {getInnerId, getUserInfo, delUser, changeUserInfo} from '../api/UserManage'
+import { codeResult } from '../utils/tools'
+import {getInnerId, bindBankCard, dismissBankCard, rechargeCard} from '../api/UserManage'
 export default {
   data() {
     return {
-      leftColumns: leftColumn,
-      rightColumns: rightColumn,
-      leftData: leftData,
-      rightData: rightData,
-      modal1: false,
-      loading: {
-        left: true,
-        right: true,
+      bankForm: {
+        cName: "",
+        cId:"",
+        operation:1,
+        cardId: "",
+        value:0,
       },
-      riskLevelOptions: [],
-      selections: [],
     };
   },
-
-  methods: {
-    handleChange3(rightData, direction, moveData) {
-      console.log("rightData:");
-      console.log(rightData);
-      console.log("direction:");
-      console.log(direction);
-      console.log("moveData:");
-      console.log(moveData);
-    },
-    cancelMethod() {
-      // 可以关闭弹窗 关闭弹窗把modal置为false即可
-      this.modal1 = false;
-      // 可以实现自己的取消业务逻辑 可以不关闭弹窗
-    },
-    confirmMethod() {
-      this.modal1 = false;
-      //console.log(this.selections);
-      //this.leftData = this.leftData.filter(t => !this.selections.some(s => s.c_ID == t.c_ID));
-      delUser({c_inner_ID:this.leftData[0].cInnerId});
-      this.leftData.splice(0,1);
-    },
-    getAllUserInfo(){
-      let userData = []; 
-      getInnerId({fragment: "1"}).then(res => {
-        for (var i = 0; i < res.data.infoNums; i++) {
-          let id = res.data.info[i].cInnerId;
-          getUserInfo({ account: id}).then(res_i => {
-            let newData = {
-              cInnerId: id,
-              cName: res_i.data.cName,
-              cId: res_i.data.cId,
-              cAddress: res_i.data.cAddress,
-              cEmail: res_i.data.cEmail,
-              cTel: res_i.data.cTel,
-              cRiskLevel: res_i.data.cRiskLevel,
-              money: "120.00",
-              cardId: "6223 5678 1234 5678",
-              asset: "易方达基金",
-            };
-            userData.push(newData);
-          })
+  methods:{
+    //验证申请
+    handleSubmit(name) {
+      getInnerId({fragment: bankForm.cId}).then(respond =>{
+        let c_inner_id=respond.data.info[0].cInnerId;
+        switch(bankForm.operation){
+          //绑卡
+          case 1:
+            bindBankCard({
+              c_inner_ID: c_inner_id,
+              card_id:bankForm.cardId,
+            }).then(res =>{
+              if(res.status==200&&res.data.resultCode==1)
+                this.$hMessage.success("提交成功!");
+              else
+                this.$hMessage.error(codeResult(res.data.resultCode));
+            });
+            break;
+          //解绑
+          case 2:
+            dismissBankCard({
+              c_inner_ID: c_inner_id,
+              card_id:bankForm.cardId,
+            }).then(res =>{
+              if(res.status==200&&res.data.resultCode==1)
+                this.$hMessage.success("提交成功!");
+              else
+                this.$hMessage.error(codeResult(res.data.resultCode));
+            });
+            break;
+          //充值
+          case 3:
+            rechargeCard({
+              card_id:bankForm.cardId,
+              amount: bankForm.value,
+            }).then(res =>{
+              if(res.status==200&&res.data.resultCode==1)
+                this.$hMessage.success("提交成功!");
+              else
+                this.$hMessage.error(codeResult(res.data.resultCode));
+            })
+            break;
         }
-      });
-      console.log("getUserData:")
-      console.log(userData);
-      return userData;
+      })
     },
-    reloadData(){
-      //leftData=getAllUserInfo();
-      console.log("reloadData");
-      this.sleep(200);
-      this.resetLoading();
-      this.leftData = this.getAllUserInfo();
-      return 0;
+    //表单重置
+    handleReset(name) {
+      this.$refs[name].resetFields();
     },
-    deleteData(){
-      this.modal1 = true;
-    },
-    saveData(){
-      console.log("saveData:");
-      this.leftData = this.$refs.transferTable.getAlldata().leftData;
-      console.log(this.leftData);
-      for (var i = 0; i < this.leftData.length; i++) {
-        changeUserInfo({
-        c_inner_ID: this.leftData[i].cInnerId,
-        c_risk_level: this.leftData[i].cRiskLevel,
-        c_address: this.leftData[i].cAddress,
-        c_email: this.leftData[i].cEmail,
-        c_tel: this.leftData[i].cTel,
-        c_represent_ID_type: 0,
-        c_represent_ID: "",
-        }).then(res =>{console.log(res)});
-      }
-      return 0;
-    },
-    filterMethod(data, query) {
-      if(data.c_ID.indexOf(query) > 0)
-          return data.c_ID.indexOf(query);
-      else
-          return data.c_name.indexOf(query) > -1;
-    },
-    resetLoading() {
-      this.loading.left = !this.loading.left
-      this.loading.right = !this.loading.right
-    },
-    sleep(ms) { 
-      var unixtime_ms = new Date().getTime();
-      while(new Date().getTime() < unixtime_ms + ms) {}
-    },
-  },
-
-  mounted() {
-    this.riskLevelOptions[6] = [
-      { value: 1, label: "低风险" },
-      { value: 2, label: "中风险" },
-      { value: 3, label: "高风险" },
-    ];
-  },
+  }
 };
 </script>

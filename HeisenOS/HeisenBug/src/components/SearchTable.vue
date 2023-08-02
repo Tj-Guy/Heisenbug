@@ -18,7 +18,7 @@
       :hiderTable="false" 
       :hideOperations="false"
       lTitle="用户基本信息"
-      rTitle="用户银行卡管理"
+      rTitle="用户银行卡信息"
       :border="true"
       :loading="loading"
       :stripe="true"
@@ -47,19 +47,7 @@
 </template>
 
 <script>
-var leftData = [
-  {
-    cName: "王小明",
-    cId: "440602200309081218",
-    cAddress: "北京市朝阳区芍药居",
-    cRiskLevel: "低风险",
-    cEmail: "1306134022@gmail.com",
-    cTel: "12327382282",
-    money: "120.00",
-    cardId: "6223 5678 1234 5678",
-    asset: "易方达基金",
-  }
-];
+var leftData = [];
 
 var rightData = [];
 
@@ -132,6 +120,7 @@ var rightColumn = [
     width: 80,
     rule: { required: true, message: "姓名不能为空" },
     typeWidth: 60,
+    noEdit:true,
   },
   {
     type: "card",
@@ -139,6 +128,7 @@ var rightColumn = [
     key: "cardId",
     width: 160,
     rule: { required: true, message: "卡号不能为空" },
+    noEdit:true,
   },
   {
     type: "money",
@@ -163,7 +153,7 @@ var rightColumn = [
   },
 ];
 
-import {getInnerId, getUserInfo, delUser, changeUserInfo} from '../api/UserManage'
+import {getInnerId, getUserInfo, delUser, changeUserInfo, findBankCard} from '../api/UserManage'
 export default {
   data() {
     return {
@@ -204,24 +194,30 @@ export default {
     },
     getAllUserInfo(){
       let userData = []; 
-      getInnerId({fragment: "1"}).then(res => {
-        for (var i = 0; i < res.data.infoNums; i++) {
-          let id = res.data.info[i].cInnerId;
-          getUserInfo({ account: id}).then(res_i => {
+      getInnerId({fragment: "1"}).then(respond => {
+        for (var i = 0; i < respond.data.infoNums; i++) {
+          let id = respond.data.info[i].cInnerId;
+          getUserInfo({ account: id}).then(res => {
             let newData = {
               cInnerId: id,
-              cName: res_i.data.cName,
-              cId: res_i.data.cId,
-              cAddress: res_i.data.cAddress,
-              cEmail: res_i.data.cEmail,
-              cTel: res_i.data.cTel,
-              cRiskLevel: res_i.data.cRiskLevel,
-              money: "120.00",
-              cardId: "6223 5678 1234 5678",
+              cName: res.data.cName,
+              cId: res.data.cId,
+              cAddress: res.data.cAddress,
+              cEmail: res.data.cEmail,
+              cTel: res.data.cTel,
+              cRiskLevel: res.data.cRiskLevel,
+              money: "0.0",
+              cardId: "-",
               asset: "易方达基金",
             };
             userData.push(newData);
-          })
+          });
+          findBankCard({c_inner_ID: id}).then(res =>{
+            if(res.data.infoNums > 0){
+              userData[i].cardId=res.data.info[0].cardId;
+              userData[i].money=res.data.info[0].value;
+            }
+          });
         }
       });
       console.log("getUserData:")
