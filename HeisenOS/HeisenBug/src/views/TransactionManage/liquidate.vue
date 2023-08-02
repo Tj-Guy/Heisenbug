@@ -11,8 +11,6 @@
       </h-card>
       <decision/>
     </div>
-
-    
 </template>
 
 <script>
@@ -158,9 +156,10 @@ myChart.on('click', function (params) {
         if(params.name==='日初始化'){
           alert('进行日初始化！')
           IfInit=true
+          //getNextDay()
+          cal()
           option.series[0].data.forEach(function (node) {
           node.itemStyle.color = node.name === params.data.name ? 'lightgreen' : node.itemStyle.color;
-          getNextDay()
         });
         }else if(params.name==='接收行情'){
           if(IfInit===true){
@@ -176,9 +175,9 @@ myChart.on('click', function (params) {
           if(ReceiveCount===true&&IfStopTransaction==true){
             alert('正在处理确认数据')
             DoData=true
+            //cal()
             option.series[0].data.forEach(function (node) {
             node.itemStyle.color = node.name === params.data.name ? 'lightgreen' : node.itemStyle.color;
-          cal()
         });
           }else{
             alert('请先完成前置步骤(停止交易&接收行情）！')
@@ -186,10 +185,10 @@ myChart.on('click', function (params) {
         }else if(params.name==='导出申请数据'){
           if(IfStopTransaction===true){
             alert('正在导出申请数据')
+            reCal()
             ExportData+=1
             option.series[0].data.forEach(function (node) {
           node.itemStyle.color = node.name === params.data.name ? 'lightgreen' : node.itemStyle.color;
-          reCal()
         });
           }else{
             alert('请先完成停止当日交易！')
@@ -207,10 +206,10 @@ myChart.on('click', function (params) {
         }else if(params.name==='数据汇总'){
           if(ExportData==true&&DoData==true){
             alert('当日清算完成！')
+            //saveCal()
             IfConfirm=true
             option.series[0].data.forEach(function (node) {
           node.itemStyle.color = node.name === params.data.name ? 'lightgreen' : node.itemStyle.color;
-          saveCal()
         });
          }else{
             alert('请先完成前置步骤（处理确认数据&导出申请数据）！')
