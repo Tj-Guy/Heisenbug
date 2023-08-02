@@ -37,8 +37,6 @@
         <p>是否继续删除？</p>
       </div>
       <p slot="footer">
-        <!-- slot内可以放任意自定义内容 -->
-        <!-- 点击取消和确定按钮时可实现自己的业务逻辑 -->
         <h-button @click="cancelMethod">取消</h-button>
         <h-button type="error" @click="confirmMethod">确定</h-button>
       </p>
@@ -181,9 +179,8 @@ export default {
       console.log(moveData);
     },
     cancelMethod() {
-      // 可以关闭弹窗 关闭弹窗把modal置为false即可
+      //关闭弹窗
       this.modal1 = false;
-      // 可以实现自己的取消业务逻辑 可以不关闭弹窗
     },
     confirmMethod() {
       this.modal1 = false;
@@ -253,10 +250,10 @@ export default {
       return 0;
     },
     filterMethod(data, query) {
-      if(data.c_ID.indexOf(query) > 0)
-          return data.c_ID.indexOf(query);
+      if(data.cId.indexOf(query) > 0)
+          return data.cId.indexOf(query);
       else
-          return data.c_name.indexOf(query) > -1;
+          return data.cName.indexOf(query) > -1;
     },
     resetLoading() {
       this.loading.left = !this.loading.left

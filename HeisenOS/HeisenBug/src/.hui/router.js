@@ -14,6 +14,21 @@ export default initRouter(
           component: Index,
         },
         {
+          name: 'productManage-createProduct',
+          path: 'productManage/createProduct',
+          component: ProductManageCreateProduct,
+        },
+        {
+          name: 'productManage-modifyProduct',
+          path: 'productManage/modifyProduct',
+          component: ProductManageModifyProduct,
+        },
+        {
+          name: 'productManage-productDetail',
+          path: 'productManage/productDetail',
+          component: ProductManageProductDetail,
+        },
+        {
           name: 'TransactionManage-buy',
           path: 'TransactionManage/buy',
           component: TransactionManageBuy,
@@ -32,21 +47,6 @@ export default initRouter(
           name: 'TransactionManage-redeem',
           path: 'TransactionManage/redeem',
           component: TransactionManageRedeem,
-        },
-        {
-          name: 'productManage-createProduct',
-          path: 'productManage/createProduct',
-          component: ProductManageCreateProduct,
-        },
-        {
-          name: 'productManage-modifyProduct',
-          path: 'productManage/modifyProduct',
-          component: ProductManageModifyProduct,
-        },
-        {
-          name: 'productManage-productDetail',
-          path: 'productManage/productDetail',
-          component: ProductManageProductDetail,
         },
         {
           name: 'userManage-bankCard-index',
@@ -77,6 +77,21 @@ export default initRouter(
 function Index() {
   return import(/* webpackChunkName: "index" */ '@/views/index.vue')
 }
+function ProductManageCreateProduct() {
+  return import(
+    /* webpackChunkName: "productManage-createProduct" */ '@/views/productManage/createProduct.vue'
+  )
+}
+function ProductManageModifyProduct() {
+  return import(
+    /* webpackChunkName: "productManage-modifyProduct" */ '@/views/productManage/modifyProduct.vue'
+  )
+}
+function ProductManageProductDetail() {
+  return import(
+    /* webpackChunkName: "productManage-productDetail" */ '@/views/productManage/productDetail.vue'
+  )
+}
 function TransactionManageBuy() {
   return import(
     /* webpackChunkName: "TransactionManage-buy" */ '@/views/TransactionManage/buy.vue'
@@ -95,21 +110,6 @@ function TransactionManageOrdersModification() {
 function TransactionManageRedeem() {
   return import(
     /* webpackChunkName: "TransactionManage-redeem" */ '@/views/TransactionManage/redeem.vue'
-  )
-}
-function ProductManageCreateProduct() {
-  return import(
-    /* webpackChunkName: "productManage-createProduct" */ '@/views/productManage/createProduct.vue'
-  )
-}
-function ProductManageModifyProduct() {
-  return import(
-    /* webpackChunkName: "productManage-modifyProduct" */ '@/views/productManage/modifyProduct.vue'
-  )
-}
-function ProductManageProductDetail() {
-  return import(
-    /* webpackChunkName: "productManage-productDetail" */ '@/views/productManage/productDetail.vue'
   )
 }
 function UserManageBankCardIndex() {

@@ -105,7 +105,7 @@
       
       <!-- 提交与重置取消按钮 -->
       <h-form-item>
-        <h-button type="primary" @click="handleSubmit('formItem1')">提交</h-button>
+        <h-button type="primary" @click="modal1 = true">提交</h-button>
         <h-button type="ghost" style="margin-left: 8px;" @click="handleReset('formItem1')">重置/取消</h-button>
       </h-form-item>
 
@@ -114,6 +114,15 @@
         <FileUpdate/>
       </h-form-item>
     </h-form>
+    <h-msg-box v-model="modal1" width="360">
+      <div style="text-align: center;">
+        <p>是否确认提交</p>
+      </div>
+      <p slot="footer">
+        <h-button @click="cancelMethod">取消</h-button>
+        <h-button type="error" @click="confirmMethod">确定</h-button>
+      </p>
+    </h-msg-box>
   </div>
 </template>
 
@@ -128,6 +137,7 @@ export default {
   data() {
     return {
       model1: "",
+      modal1: false,
       changeform: false,
       formItem1: {
         //四要素
@@ -290,6 +300,15 @@ export default {
     };
   },
   methods: {
+    cancelMethod() {
+      //关闭弹窗
+      this.modal1 = false;
+    },
+    confirmMethod(){
+      this.modal1 = false;
+      //提交表单
+      this.handleSubmit('formItem1');
+    },
     //在创建用户成功后，补充详细信息提交，已确保正确，提高效率
     detailSubmit(cInnerId){
       changeUserInfo({
