@@ -60,10 +60,10 @@
                         top="150"
                         v-model="showDetail">
                             <p>操作员:{{ adminInfo.admin_name }}</p>
-                            <p>用户内部识别码:{{ cInfo.c_inner_ID }}</p>
+                            <p>用户内部识别码:{{ inputInfo.c_input_inner_ID }}</p>
                             <p>基金代码:{{ withdrawInfo.f_id }}</p>
                             <p>用户姓名:{{ cInfo.c_name }}</p>
-                            <p>操作时间:{{ withdrawInfo.time }}</p>
+                            <p>操作时间:{{ getCurrentTime }}</p>
                             <p>撤单状态:已撤</p>
             </h-msg-box>
         </div>
@@ -175,7 +175,8 @@ export default {
           render: (h, params) => {
             console.log(params.row)
             //params.row.f_total_value=params.row.f_time_value*params.row.f_portion
-            const canWithdraw = this.canWithdrawOrder(params.row.fDate);
+            let canWithdraw = this.canWithdrawOrder(params.row.fDate);
+            canWithdraw=(canWithdraw&&params.row.fStatus==1)
             return h("div", [
               h(
                 "h-button",
@@ -190,11 +191,12 @@ export default {
                         this.withdrawInfo.f_id=params.row.fId
                         this.withdrawInfo.cardid=this.inputInfo.c_input_card_id
                         cancelOrder({
-                          fTradeType:this.withdrawInfo.tradetype,
-                          fTradeStreamId:this.withdrawInfo.f_trade_stream_id
+                          fTradeType:params.row.fTradeType,
+                          fTradeStreamId:params.row.fTradeStreamId
                         }).then(res =>{
                         console.log(res);
             if(res.data.resultCode >-1){
+                alert('撤单成功')
                 this.showDetail=true
             }
       }); 
@@ -303,9 +305,9 @@ export default {
           if(index===1){
             return '未成交'
           }else if(index===2){
-            return '已撤单'
-          }else{
             return '已成交'
+          }else if(index==-1){
+            return '已撤单'
           }
         },
 

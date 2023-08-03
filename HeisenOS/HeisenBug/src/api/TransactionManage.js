@@ -115,7 +115,7 @@ export function getUserAccount(params) {
 export function cancelOrder(params) {
     return request({
         url: '/cancelOrder',
-        method: 'get',
+        method: 'post',
         params,
     })
 }
